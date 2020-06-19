@@ -1,0 +1,9 @@
+2020-06-18T16:45:54|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "KeithleyApp.py", line 22, in <module>
+    app = KeithleyTestApp(sys.argv)
+  File "C:\Users\lindat18\AppData\Local\Continuum\miniconda3\envs\scopefoundry\lib\site-packages\ScopeFoundry\base_app.py", line 332, in __init__
+    self.setup()
+  File "KeithleyApp.py", line 9, in setup
+    from .keithley_sourcemeter.keithley_sourcemeter_hc import KeithleySourceMeterComponent
+ModuleNotFoundError: No module named '__main__.keithley_sourcemeter'; '__main__' is not a package
+

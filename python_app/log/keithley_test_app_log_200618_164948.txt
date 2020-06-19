@@ -1,0 +1,9 @@
+2020-06-18T16:49:49|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "KeithleyApp.py", line 23, in <module>
+    app = KeithleyTestApp(sys.argv)
+  File "C:\Users\lindat18\AppData\Local\Continuum\miniconda3\envs\scopefoundry\lib\site-packages\ScopeFoundry\base_app.py", line 332, in __init__
+    self.setup()
+  File "KeithleyApp.py", line 10, in setup
+    from . import keithley_sourcemeter
+ImportError: cannot import name 'keithley_sourcemeter'
+
