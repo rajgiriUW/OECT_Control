@@ -1,9 +1,0 @@
-2020-06-18T16:42:49|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
-  File "KeithleyApp.py", line 22, in <module>
-    app = KeithleyTestApp(sys.argv)
-  File "C:\Users\lindat18\AppData\Local\Continuum\miniconda3\envs\scopefoundry\lib\site-packages\ScopeFoundry\base_app.py", line 332, in __init__
-    self.setup()
-  File "KeithleyApp.py", line 9, in setup
-    from ..keithley_sourcemeter.keithley_sourcemeter_hc import KeithleySourceMeterComponent
-ValueError: attempted relative import beyond top-level package
-
