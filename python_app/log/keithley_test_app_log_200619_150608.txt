@@ -1,0 +1,17 @@
+2020-06-19T15:06:09|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\ScopeFoundry\hardware.py", line 208, in enable_connection
+    raise err
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\ScopeFoundry\hardware.py", line 204, in enable_connection
+    self.connect()
+  File "..\keithley_sourcemeter\keithley_sourcemeter_hc.py", line 61, in connect
+    K = self.keithley = KeithleySourceMeter(port=self.port.val, debug=self.debug_mode.val)
+  File "..\keithley_sourcemeter\keithley_sourcemeter_interface.py", line 25, in __init__
+    self.ser = serial.Serial(port=self.port, baudrate=self.KeithleyBaudRate, stopbits=1, xonxoff=0, rtscts=0, timeout=5.0)#,
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\serial\serialwin32.py", line 31, in __init__
+    super(Serial, self).__init__(*args, **kwargs)
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\serial\serialutil.py", line 240, in __init__
+    self.open()
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\serial\serialwin32.py", line 62, in open
+    raise SerialException("could not open port {!r}: {!r}".format(self.portstr, ctypes.WinError()))
+serial.serialutil.SerialException: could not open port 'COM6': FileNotFoundError(2, 'The system cannot find the file specified.', None, 2)
+

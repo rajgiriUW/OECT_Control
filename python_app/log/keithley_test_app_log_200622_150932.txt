@@ -1,0 +1,1 @@
+2020-06-22T15:09:33|WARNING|pymeasure.adapters.vxi11|Failed to import vxi11 package, which is required for the VXI11Adapter
