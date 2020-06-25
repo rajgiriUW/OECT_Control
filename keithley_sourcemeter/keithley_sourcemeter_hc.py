@@ -7,7 +7,6 @@ from ScopeFoundry import HardwareComponent
 
 try:
     from .keithley_sourcemeter_gpib_interface import KeithleySourceMeter
-    print("SUCCESS")
 except Exception as err:
     print("Cannot load required modules for Keithley SourceMeter:", err)
 
@@ -20,7 +19,7 @@ class KeithleySourceMeterComponent(HardwareComponent): #object-->HardwareCompone
     def setup(self):
         self.debug = True
         
-        self.port = self.settings.New('port', dtype=str)
+        self.port = self.settings.New('port', dtype=str, initial='COM21')
         
         # Ranges for Models 2611B/2612B/2614B
         self.v_ranges = {'200 mV':0.2,'2 V':2, '20 V':20, '200 V':200}
@@ -37,18 +36,18 @@ class KeithleySourceMeterComponent(HardwareComponent): #object-->HardwareCompone
         self.source_V_a = self.settings.New('source_V_a', unit='V', spinbox_decimals = 6)
         self.source_I_a = self.settings.New('source_I_a', unit='A', spinbox_decimals = 6)
                 
-        self.source_V_a_range = self.settings.New('source_V_a_range', str, choices = self.v_ranges.keys())
-        self.measure_V_a_range = self.settings.New('measure_V_a_range', str, choices = self.v_ranges.keys())
-        self.source_I_a_range = self.settings.New('source_I_a_range', str, choices = self.i_ranges.keys())
-        self.measure_I_a_range = self.settings.New('measure_I_a_range', str, choices = self.i_ranges.keys())
+        self.source_V_a_range = self.settings.New('source_V_a_range')#, str, choices = self.v_ranges.keys())
+        self.measure_V_a_range = self.settings.New('measure_V_a_range')#, str, choices = self.v_ranges.keys())
+        self.source_I_a_range = self.settings.New('source_I_a_range')#, str, choices = self.i_ranges.keys())
+        self.measure_I_a_range = self.settings.New('measure_I_a_range')#, str, choices = self.i_ranges.keys())
             
-
             
-        # self.output_a_on = self.settings.New('output_a_on', bool, initial=False)
+        self.output_a_on = self.settings.New('output_a_on', bool, initial=False)
         self.NPLC_a = self.settings.New('NPLC_a', int)
         self.delay_time_a = self.settings.New('delay_time_a', float, spinbox_decimals = 3, unit='sec')
         
-        # self.is_a_measuring = self.settings.New('is_measuring', bool, initial = False, ro=True)
+        self.is_a_measuring = self.settings.New('is_measuring', bool, initial = False, ro=True)
+        
         
         
     def connect(self):
@@ -56,34 +55,38 @@ class KeithleySourceMeterComponent(HardwareComponent): #object-->HardwareCompone
         
         # Open connection to hardware
         K = self.keithley = KeithleySourceMeter(port=self.port.val, debug=self.debug_mode.val)
+        print(K.ask(":SOUR:VOLT:RANG?")) #test reading
 
         # connect logged quantities
-
-        self.V_a.connect_to_hardware(lambda:K.read_V(), None)
-        self.I_a.connect_to_hardware(lambda:K.read_I(), None)
+        self.V_a.connect_to_hardware(lambda:K.read_V(),None)
+        self.I_a.connect_to_hardware(lambda:K.read_I(),None)
         
         self.source_I_a.connect_to_hardware(None,lambda I:K.source_I(I))
-        self.source_V_a.connect_to_hardware(None,lambda V:K.source_V(V))        
-        # self.source_V_a_range.connect_to_hardware(lambda:self.read_range('source', 'v'),
-        #             lambda _range:K.write_range(_range,'source','v'))
-        # self.measure_V_a_range.connect_to_hardware(lambda:K.read_range('measure', 'v'), 
-        #             lambda _range:K.write_range(_range,'measure','v'))
-        # self.source_I_a_range.connect_to_hardware(lambda:K.read_range('source', 'i'), 
-        #             lambda _range:K.write_range(_range,'source','i'))
-        # self.measure_I_a_range.connect_to_hardware(lambda:K.read_range('measure', 'i'), 
-        #             lambda _range:K.write_range(_range,'measure','i'))
-        
-        # self.output_a_on.connect_to_hardware(K.read_output_on,
-        #             lambda on:K.write_output_on(on, channel='a'))
-        
-        self.NPLC_a.connect_to_hardware(lambda:K.read_NPLC(),
-                    lambda time:K.write_NPLC(time))
+        self.source_V_a.connect_to_hardware(None,lambda V:K.source_V(V))
 
+            
+        #testing code - pressing "read from hardware" should update source_V_a_range setting in the panel
+        self.source_V_a_range.connect_to_hardware(lambda:K.read_source_volt_range(), None)
 
-        # self.delay_time_a.connect_to_hardware(lambda: K.read_measure_delay('a'),
-        #             lambda delay:K.write_measure_delay(delay, 'a'))
+        #uncomment 71-88 after fixing hardware-setting connection 
+        # self.source_V_a_range.connect_to_hardware(lambda:self.read_range('SOUR', 'VOLT'), 
+        #             lambda _range:self.write_range(_range,'SOUR', 'VOLT'))
+        # self.measure_V_a_range.connect_to_hardware(lambda:self.read_range('SENS', 'VOLT'), 
+        #             lambda _range:self.write_range(_range,'SENS','VOLT'))
+        # self.source_I_a_range.connect_to_hardware(lambda:self.read_range('SOUR', 'CURR'), 
+        #             lambda _range:self.write_range(_range,'SENS','CURR'))
+        # self.measure_I_a_range.connect_to_hardware(lambda:self.read_range('SENS', 'CURR'), 
+        #             lambda _range:self.write_range(_range,'SENS','CURR'))
         
-        # self.is_a_measuring.connect_to_hardware(read_func=K.read_is_measuring) ////     
+        # self.output_a_on.connect_to_hardware(K.read_output_on, 
+        #             lambda on:K.write_output_on(on))
+        
+        # self.NPLC_a.connect_to_hardware(lambda: K.read_NPLC(),
+        #             lambda time:K.write_NPLC(time))
+        # self.delay_time_a.connect_to_hardware(lambda: K.read_measure_delay(),
+        #             lambda delay:K.write_measure_delay(delay))
+        
+        # self.is_a_measuring.connect_to_hardware(read_func=K.read_is_measuring)        
         
         print('connected to ',self.name)
         
@@ -91,30 +94,29 @@ class KeithleySourceMeterComponent(HardwareComponent): #object-->HardwareCompone
     def disconnect(self):
         #disconnect hardware
         if hasattr(self, 'keithley'):
-            # self.keithley.write_output_on(False, channel='a')
-            # self.keithley.write_output_on(False, channel='b')
+            self.keithley.write_output_on(False)
             self.keithley.close()
-
+        
             # clean up hardware object
             del self.keithley
         
         print('disconnected ',self.name)
         
-    # def write_range(self, _range, source_or_measure = 'source', v_or_i = 'v'):
-    #     if v_or_i == 'v':
+    # def write_range(self, _range, sour_or_sens = 'SOUR', volt_or_curr = 'VOLT'):
+    #     if volt_or_curr == 'VOLT':
     #         _range = self.v_ranges[_range]
-    #     elif v_or_i == 'i':
+    #     elif volt_or_curr == 'CURR':
     #         _range = self.i_ranges[_range]
-    #     self.keithley.write_range(_range, source_or_measure, v_or_i)
+    #     self.keithley.write_range(_range, sour_or_sens, volt_or_curr)
         
-    def read_range(self, source_or_measure = 'source', v_or_i = 'v'):
-        _range = self.keithley.read_range(source_or_measure,v_or_i)
-        if v_or_i == 'v':
-            return self.v_ranges_inv[_range]
-        elif v_or_i == 'i':
-            return self.i_ranges_inv[_range]        
+    # def read_range(self, sour_or_sens = 'SOUR', volt_or_curr = 'VOLT'):
+    #     _range = self.keithley.read_range(sour_or_sens, volt_or_curr)
+    #     if volt_or_curr == 'VOLT':
+    #         return self.v_ranges_inv[_range]
+    #     elif volt_or_curr == 'CURR':
+    #         return self.i_ranges_inv[_range]      
         
-    def reset(self, channel='a'):
+    def reset(self):
         self.keithley.reset()
 
         

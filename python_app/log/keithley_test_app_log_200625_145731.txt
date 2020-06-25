@@ -1,0 +1,24 @@
+2020-06-25T14:57:59|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\ScopeFoundry\hardware.py", line 181, in read_from_hardware
+    lq.read_from_hardware()
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\ScopeFoundry\logged_quantity.py", line 161, in read_from_hardware
+    val = self.hardware_read_func()
+  File "..\keithley_sourcemeter\keithley_sourcemeter_hc.py", line 85, in <lambda>
+    self.source_V_a_range.connect_to_hardware(lambda:K.read_source_volt_range(), None)
+  File "..\keithley_sourcemeter\keithley_sourcemeter_gpib_interface.py", line 95, in read_source_volt_range
+    resp = self.ask(":SOUR:VOLT:RANG?")
+  File "..\keithley_sourcemeter\keithley_sourcemeter_gpib_interface.py", line 45, in ask
+    resp = self.keithley.query(cmd)
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\pyvisa\resources\messagebased.py", line 607, in query
+    self.write(message)
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\pyvisa\resources\messagebased.py", line 228, in write
+    count = self.write_raw(message.encode(enco))
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\pyvisa\resources\messagebased.py", line 202, in write_raw
+    return self.visalib.write(self.session, message)
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\pyvisa\ctwrapper\functions.py", line 1866, in write
+    ret = library.viWrite(session, data, len(data), byref(return_count))
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\pyvisa\ctwrapper\highlevel.py", line 193, in _return_handler
+    raise errors.VisaIOError(ret_value)
+pyvisa.errors.VisaIOError: VI_ERROR_TMO (-1073807339): Timeout expired before operation completed.
+
+2020-06-25T14:58:20|ERROR|KeithleyTestApp|tried to disconnect keithley_sourcemeter: VI_ERROR_TMO (-1073807339): Timeout expired before operation completed.

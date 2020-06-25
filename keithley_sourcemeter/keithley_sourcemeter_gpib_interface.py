@@ -8,9 +8,8 @@ from __future__ import division
 import numpy as np
 import time
 import matplotlib.pyplot as plt
-import pymeasure
-from pymeasure.instruments.keithley import *
-
+import serial
+import pyvisa as pv
 
 
 class KeithleySourceMeter(object):
@@ -19,74 +18,147 @@ class KeithleySourceMeter(object):
     '''
     KeithleyBaudRate = 9600
     
-    def __init__(self, port="GPIB0::22", debug=False):
+    def __init__(self, port="GPIB0::22::INSTR", debug=False):
         self.port = port
         self.debug = debug
+        
+        # self.ser = serial.Serial(port=self.port, baudrate=self.KeithleyBaudRate, stopbits=1, xonxoff=0, rtscts=0, timeout=5.0)#,         
+        # self.ser.flush()
+        self.resource_manager = pv.ResourceManager()
+        self.keithley = self.resource_manager.open_resource(port)
+        self.keithley.read_termination = '\r'
+        # self.keithley.read_termination = '\n'
+        # self.keithley.read_termination = '\r\n'
+        # self.keithley.read_termination = None
 
-        self.keithley = Keithley2400(port)
-        # self.keithley.reset()
-        # self.keithley.reset_buffer()
-        self.measure_delay = 0
+        # self.keithley.write_termination = '\r'
+        # self.keithley.write_termination = '\n'
+        # self.keithley.write_termination = '\r\n'
+        self.keithley.write_termination = None
+
+        self.reset()
         time.sleep(0.1)        
 
+    def ask(self, cmd):
+        # self.keithley.write(cmd)
+        # resp = self.keithley.read()
+        resp = self.keithley.query(cmd)
+        if self.debug: print('response')
+        return resp
+    
+    def send(self, cmd):
+        # cmd += '\r\n'
+        if self.debug: print('send', cmd)
+        self.keithley.write(cmd)       
+
     def close(self):
-        self.keithley.shutdown()
+        self.keithley.close()
+        self.resource_manager.close()
         print('closed keithley')
 
-    def source_V(self, V):
-        self.keithley.source_voltage = V
+    def source_V(self, V, mode = 'DC'):
+        # self.send('smu{0}.source.func = smu{0}.OUTPUT_{1}VOLTS'.format(channel, mode))        
+        # self.send('smu{0}.source.levelv = {1}'.format(channel, V))
+        self.keithley.send(":SOUR:VOLT:LEV " + str(V))
 
-    def source_I(self, I):
-        self.keithley.source_current = I
+    def source_I(self, I, mode = 'DC'):
+        # self.send('smu{0}.source.func = smu{0}.OUTPUT_{1}AMPS'.format(channel,mode))        
+        # self.send('smu{}.source.leveli = {}'.format(channel, I))
+        self.keithley.send(":SOUR:CURR:LEV " + str(I))
         
     def reset(self):
-        self.keithley.reset()
+        self.keithey.send("status:queue:clear;*RST;:stat:pres;:*CLS;")
            
-  
-    def write_range(self, _range, source_or_measure = 'source', v_or_i = 'v'):
+    def write_range(self, _range, sour_or_sens = 'SOUR', volt_or_curr = 'VOLT'):
         '''
         determines the accuracy for measuring and sourcing
         Alternatively use setAutorange_A() which might be slower
-        possible V ranges: 200 mV, 2 V, 20 V, 200V 
-        possible I ranges: 100 nA, 1 uA, 10uA, ... 100 mA, 1 A, 1.5, 10 A (10 A only in pulse mode)
+            possible V ranges: 200 mV, 2 V, 20 V, 200V 
+            possible I ranges: 100 nA, 1 uA, 10uA, ... 100 mA, 1 A, 1.5, 10 A (10 A only in pulse mode)
         refer to UserManual/Specification for accuracy
         '''
-        if (source_or_measure == "source"):
-            if (v_or_i == "v"):
-                self.keithley.source_voltage_range = _range
-            elif (v_or_i == "i"):
-                self.keithley.source_current_range = _range
-        elif (source_or_measure == "measure"):
-            if (v_or_i == "v"):
-                self.keithley.voltage_range = _range
-            elif (v_or_i == "i"):
-                self.keithley.current_range = _range
-
-
-            
-    def read_range(self,source_or_measure = 'source', v_or_i = 'v'):
-        if (source_or_measure == "source"):
-            if (v_or_i == "v"):
-                return self.keithley.source_voltage_range
-            elif (v_or_i == "i"):
-                return self.keithley.source_current_range
-        elif (source_or_measure == "measure"):
-            if (v_or_i == "v"):
-                return self.keithley.voltage_range
-            elif (v_or_i == "i"):
-                return self.keithley.current_range
+        # self.send( 'smu{0}.{1}.range{2} = {3}'.format(channel,source_or_measure,v_or_i,_range) )
+        self.send(":{0}:{1}:RANG:AUTO 0;:{0}:{1}:RANG {2}".format(sour_or_sens, volt_or_curr, _range).upper())
+        # ":SOUR:CURR:RANG:AUTO 0;:SOUR:CURR:RANG %g" src current range
+        # ":SOUR:VOLT:RANG:AUTO 0;:SOUR:VOLT:RANG %g" src voltage range
+        # ":SENS:CURR:RANG:AUTO 0;:SENS:CURR:RANG %g" meas current range
+        # ":SENS:VOLT:RANG:AUTO 0;:SENS:VOLT:RANG %g" meas voltage range
         
+            
+    def read_range(self, sour_or_sens = 'SOUR', volt_or_curr = 'VOLT'):            
+        # resp = self.ask('print(smu{0}.{1}.range{2})'.format(channel,source_or_measure,v_or_i) )
+        resp = self.ask(":{0}:{1}:RANG?".format(sour_or_sens, volt_or_curr))
+        return float(resp)
+
+    #comment out this function after fixing hardware-setting connection
+    def read_source_volt_range(self):
+        resp = self.ask(":SOUR:VOLT:RANG?")
+        return float(resp)
+
+        
+    # def write_autorange_on(self, on = True, source_or_measure = 'source', v_or_i = 'v', channel = 'a'):
+    #     _on = {True:'AUTORANGE_ON',False:'AUTORANGE_OFF'}[on]
+    #     self.send( 'smu{0}.{1}.autorange{2} = smu{0}.{3}'.format(channel,source_or_measure,v_or_i, _on) )
+
+    # def read_autorange(self,source_or_measure = 'source', v_or_i = 'v', channel = 'a'):
+    #     resp = self.ask('print(smu{0}.{1}.autorange{2})'.format(channel,source_or_measure,v_or_i))
+    #     return bool(float(resp))
+        
+    def write_output_on(self, on = True):
+        # s = {True:'OUTPUT_ON',False:'OUTPUT_OFF'}[on]
+        # self.send('smu{0}.source.output = smu{0}.{1}'.format(channel,s))
+        s = {True:'OUTPUT ON',False:'OUTPUT OFF'}[on]
+        self.send(s)
+
+    def read_output_on(self):
+        # resp = self.ask('print(smu{}.source.output)'.format(channel))
+        resp = self.ask("OUTPut?")
+        return bool(float(resp))
+      
     def read_V(self):
         try:
-            return self.keithley.voltage
+            self.measure_voltage()
+            resp = self.ask(":READ?")
+            return float(resp)
         except:
             return 0
 
+    def measure_voltage(self, nplc=1, voltage=21.0, auto_range=True):
+        """ Configures the measurement of voltage.
+        :param nplc: Number of power line cycles (NPLC) from 0.01 to 10
+        :param voltage: Upper limit of voltage in Volts, from -210 V to 210 V
+        :param auto_range: Enables auto_range if True, else uses the set voltage
+        """
+        self.send(":SENS:FUNC 'VOLT';"
+                   ":SENS:VOLT:NPLC %f;:FORM:ELEM VOLT;" % nplc)
+        if auto_range:
+            self.send(":SENS:VOLT:RANG:AUTO 1;")
+        else:
+            self.write_range(voltage, "SENS", "VOLT")
+            # self.voltage_range = voltage
+        # self.check_errors()
+    
     def read_I(self):
+        # resp = self.ask('print(smu{}.measure.i())'.format(channel))
         try:
-            return self.keithley.current  
+            self.measure_current()
+            resp = self.ask(":READ?")
+            return float(resp)
         except:
             return 0
+
+    def measure_current(self, nplc=1, current=1.05e-4, auto_range=True):
+        """ Configures the measurement of current.
+        :param nplc: Number of power line cycles (NPLC) from 0.01 to 10
+        :param current: Upper limit of current in Amps, from -1.05 A to 1.05 A
+        :param auto_range: Enables auto_range if True, else uses the set current
+        """
+        self.send(":SENS:FUNC 'CURR';"
+                   ":SENS:CURR:NPLC %f;:FORM:ELEM CURR;" % nplc)
+        if auto_range:
+            self.send(":SENS:CURR:RANG:AUTO 1;")
+        else:
+            self.write_range(current, "SENS", "CURR")
 
     def write_NPLC(self, n):
         '''
@@ -95,16 +167,45 @@ class KeithleySourceMeter(object):
         integration time, and increases measurement resolution and accuracy, however the trade-off 
         is slower measurement rates. (sets ADC_integration_time to NPLC*0.1/60 sec)
         '''
-        self.keithley.current_nplc = n
+        self.write(":SENS:CURR:NPLC " + str(n))
+        # self.send('smu{}.measure.nplc = {}'.format(channel, n))
         
     def read_NPLC(self):
-        return self.keithley.current_nplc
-            
-    def prepare_buffer(self, channel = 'a', buffer_n = '1'):
-        # self.send( 'smu{}.nvbuffer{}.clear()'.format(channel, buffer_n) )
-        # self.send( 'smu{}.nvbuffer{}.appendmode = 1'.format(channel, buffer_n))
-        self.keithley.reset_buffer()
+        # resp = self.ask('print(smu{}.measure.nplc)'.format(channel))
+        resp = self.ask(":SENS:CURR:NPLC?")
+        return int(float(resp) )
 
+    def write_source_delay(self, delay):
+        self.send(':SOUR:DEL? ' + str(delay))
+    
+    def read_source_delay(self):
+        resp = self.ask(":SOUR:DEL?")
+        return float(resp)
+    
+    def write_measure_delay(self, delay):
+        '''
+        delay [sec]: delay between measurements
+        '''
+        # self.send('smu{}.measure.delay = {}'.format(channel, delay))
+        self.send(':TRIG:SEQ:DEL ' + str(delay))
+
+    def read_measure_delay(self):
+        # resp = self.ask('print(smu{}.measure.delay)'.format(channel))
+        resp = self.ask(':TRIG:SEQ:DEL?')
+        return float(resp)
+
+        
+    # def prepare_buffer(self, buffer_n = '1'):
+    #     # self.send( 'smu{}.nvbuffer{}.clear()'.format(channel, buffer_n) )
+    #     # self.send( 'smu{}.nvbuffer{}.appendmode = 1'.format(channel, buffer_n))
+    #     """ Resets the buffer. """
+    #     self.keithley.write(":STAT:PRES;*CLS;:TRAC:CLEAR;:TRAC:FEED:CONT NEXT;")
+
+
+
+    def read_is_measuring(self, channel = 'a'):
+        resp = self.ask('print(status.measurement.instrument.smu{}.condition)'.format(channel))
+        return bool(float(resp))
         
     # def measureIV_A(self, N, Vmin, Vmax, NPLC=1, delay=0,channel='a'):
     #     """
@@ -196,6 +297,17 @@ class KeithleySourceMeter(object):
     #     #t = np.array(Strt.split(','),dtype = np.float32)  
     #     #return t,I 
 
+    # def getI_A(self):
+    #     """
+    #     DEPRECATED use read_I('a') gets a single current measurement
+    #     """
+    #     return self.read_I('a')
+
+    # def getV_A(self):
+    #     """
+    #     DEPRECATED use read_V('a') gets a single voltage measurement, 
+    #     """
+    #     return self.read_V('a')
 
     def setRanges_A(self,Vmeasure,Vsource,Imeasure,Isource):
         '''
@@ -206,30 +318,55 @@ class KeithleySourceMeter(object):
             possible I ranges: 100 nA, 1 uA, 10uA, ... 100 mA, 1 A, 1.5, 10 A (10 A only in pulse mode)
         refer to UserManual/Specification for accuracy
         '''
-        self.write_range(Vmeasure,'measure', 'v')
-        self.write_range(Vsource,'source', 'v')
-        self.write_range(Imeasure,'measure', 'i')
-        self.write_range(Isource,'source', 'i')
+        self.write_range(Vmeasure,'SENS', 'VOLT', 'a')
+        self.write_range(Vsource,'SOUR', 'VOLT', 'a')
+        self.write_range(Imeasure,'SENS', 'CURR', 'a')
+        self.write_range(Isource,'SENS', 'CURR', 'a')
+
+    def reset(self):
+        self.send("status:queue:clear;*RST;:stat:pres;:*CLS;")
         
-if __name__ == '__main__':
-    
-    K1 = KeithleySourceMeter()
+    # def setAutoranges_A(self):
+    #     '''
+    #     sets all ranges on channel A to auto, individual ranges can be set to auto with self.write_auto_range
+    #     Alternatively use setRanges_A(Vmeasure,Vsource,Imeasure,Isource) 
+    #     to set ranges manually, which might be faster
+    #     '''
+    #     self.write_autorange_on(True, 'source', 'v', 'a')
+    #     self.write_autorange_on(True, 'source', 'i', 'a')
+    #     self.write_autorange_on(True, 'measure', 'v', 'a')
+    #     self.write_autorange_on(True, 'measure', 'i', 'a')
 
-    # K1.reset('a')
+    # def setV_A(self,V):
+    #     """
+    #     DEPRECIATED set DC voltage on channel A and turns it on
+    #     """
+    #     self.source_V(V, 'a', 'DC')
+        
+    # def resetA(self):
+    #     #depreciated 
+    #     self.reset(channel='a')
+
+
+# if __name__ == '__main__':
     
-    #K1.setRanges_A(Vmeasure=2,Vsource=2,Imeasure=0.1,Isource=0.1)
-    #K1.setAutoranges_A()
-    K1.setV_A(V=0)
+#     K1 = KeithleySourceMeter()
+
+#     K1.reset('a')
     
-    K1.switchV_A_on()
+#     #K1.setRanges_A(Vmeasure=2,Vsource=2,Imeasure=0.1,Isource=0.1)
+#     #K1.setAutoranges_A()
+#     K1.setV_A(V=0)
+    
+#     K1.switchV_A_on()
 
     
-    K1.setRanges_A(Vmeasure=2,Vsource=2,Imeasure=1,Isource=1)    
-    I,V = K1.measureIV_A(20, Vmin=-1, Vmax = 1, KeithleyADCIntTime=1, delay=0)
-    plt.plot(I,V)
-    plt.show()
+#     K1.setRanges_A(Vmeasure=2,Vsource=2,Imeasure=1,Isource=1)    
+#     I,V = K1.measureIV_A(20, Vmin=-1, Vmax = 1, KeithleyADCIntTime=1, delay=0)
+#     plt.plot(I,V)
+#     plt.show()
     
-    K1.switchV_A_off()         
-    K1.close()
+#     K1.switchV_A_off()         
+#     K1.close()
 
-    pass
+#     pass

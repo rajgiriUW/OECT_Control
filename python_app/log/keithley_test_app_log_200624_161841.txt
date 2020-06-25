@@ -1,0 +1,13 @@
+2020-06-24T16:18:49|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\ScopeFoundry\hardware.py", line 181, in read_from_hardware
+    lq.read_from_hardware()
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\ScopeFoundry\logged_quantity.py", line 161, in read_from_hardware
+    val = self.hardware_read_func()
+  File "..\keithley_sourcemeter\keithley_sourcemeter_hc.py", line 63, in <lambda>
+    self.V_a.connect_to_hardware(lambda:K.read_V(),None)
+  File "..\keithley_sourcemeter\keithley_sourcemeter_gpib_interface.py", line 102, in read_V
+    resp = self.ask(":READ?")
+  File "..\keithley_sourcemeter\keithley_sourcemeter_gpib_interface.py", line 32, in ask
+    self.write(cmd)
+AttributeError: 'KeithleySourceMeter' object has no attribute 'write'
+
