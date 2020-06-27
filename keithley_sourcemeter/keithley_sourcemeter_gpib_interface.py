@@ -22,52 +22,54 @@ class KeithleySourceMeter(object):
         self.port = port
         self.debug = debug
         
-        # self.ser = serial.Serial(port=self.port, baudrate=self.KeithleyBaudRate, stopbits=1, xonxoff=0, rtscts=0, timeout=5.0)#,         
-        # self.ser.flush()
         self.resource_manager = pv.ResourceManager()
         self.keithley = self.resource_manager.open_resource(port)
-        self.keithley.read_termination = '\r'
-        # self.keithley.read_termination = '\n'
-        # self.keithley.read_termination = '\r\n'
-        # self.keithley.read_termination = None
-
-        # self.keithley.write_termination = '\r'
-        # self.keithley.write_termination = '\n'
-        # self.keithley.write_termination = '\r\n'
-        self.keithley.write_termination = None
 
         self.reset()
         time.sleep(0.1)        
 
     def ask(self, cmd):
-        # self.keithley.write(cmd)
-        # resp = self.keithley.read()
+        '''
+        Writes specified to the device and returns the response.
+        '''
         resp = self.keithley.query(cmd)
         if self.debug: print('response')
         return resp
+
     
     def send(self, cmd):
-        # cmd += '\r\n'
+        '''
+        Writes specified commands to the device.
+        '''
         if self.debug: print('send', cmd)
         self.keithley.write(cmd)       
 
     def close(self):
+        if (self.read_output_on): self.write_output_on(False) #disable output
         self.keithley.close()
         self.resource_manager.close()
         print('closed keithley')
 
     def source_V(self, V, mode = 'DC'):
+        '''
+        Set source voltage.
+        '''
         # self.send('smu{0}.source.func = smu{0}.OUTPUT_{1}VOLTS'.format(channel, mode))        
         # self.send('smu{0}.source.levelv = {1}'.format(channel, V))
-        self.keithley.send(":SOUR:VOLT:LEV " + str(V))
+        self.send(":SOUR:VOLT:LEV %g" % (V)) #+ str(V))
+        print(self.ask(':SOUR:VOLT?')) ###test read
 
     def source_I(self, I, mode = 'DC'):
+        '''
+        Set source current.
+        '''
         # self.send('smu{0}.source.func = smu{0}.OUTPUT_{1}AMPS'.format(channel,mode))        
         # self.send('smu{}.source.leveli = {}'.format(channel, I))
-        self.keithley.send(":SOUR:CURR:LEV " + str(I))
+        self.send(":SOUR:CURR:LEV %g" % (I)) # + str(I))
+        print(self.ask(':SOUR:CURR?')) ###test read
         
     def reset(self):
-        self.keithey.send("status:queue:clear;*RST;:stat:pres;:*CLS;")
+        self.send("status:queue:clear;*RST;:stat:pres;:*CLS;")
            
     def write_range(self, _range, sour_or_sens = 'SOUR', volt_or_curr = 'VOLT'):
         '''
@@ -75,10 +77,12 @@ class KeithleySourceMeter(object):
         Alternatively use setAutorange_A() which might be slower
             possible V ranges: 200 mV, 2 V, 20 V, 200V 
             possible I ranges: 100 nA, 1 uA, 10uA, ... 100 mA, 1 A, 1.5, 10 A (10 A only in pulse mode)
-        refer to UserManual/Specification for accuracy
+        refer to UserManual/Specification for accuracy.
+        SOUR corresponds to source; SENS corresponds to measurement.
+        VOLT corresponds to voltage; CURR corresponds to current.
         '''
-        # self.send( 'smu{0}.{1}.range{2} = {3}'.format(channel,source_or_measure,v_or_i,_range) )
         self.send(":{0}:{1}:RANG:AUTO 0;:{0}:{1}:RANG {2}".format(sour_or_sens, volt_or_curr, _range).upper())
+        print(self.read_range(sour_or_sens, volt_or_curr)) ###test read
         # ":SOUR:CURR:RANG:AUTO 0;:SOUR:CURR:RANG %g" src current range
         # ":SOUR:VOLT:RANG:AUTO 0;:SOUR:VOLT:RANG %g" src voltage range
         # ":SENS:CURR:RANG:AUTO 0;:SENS:CURR:RANG %g" meas current range
@@ -86,42 +90,35 @@ class KeithleySourceMeter(object):
         
             
     def read_range(self, sour_or_sens = 'SOUR', volt_or_curr = 'VOLT'):            
-        # resp = self.ask('print(smu{0}.{1}.range{2})'.format(channel,source_or_measure,v_or_i) )
+        '''
+        Return set range.
+        '''
         resp = self.ask(":{0}:{1}:RANG?".format(sour_or_sens, volt_or_curr))
         return float(resp)
-
-    #comment out this function after fixing hardware-setting connection
-    def read_source_volt_range(self):
-        resp = self.ask(":SOUR:VOLT:RANG?")
-        return float(resp)
-
-        
-    # def write_autorange_on(self, on = True, source_or_measure = 'source', v_or_i = 'v', channel = 'a'):
-    #     _on = {True:'AUTORANGE_ON',False:'AUTORANGE_OFF'}[on]
-    #     self.send( 'smu{0}.{1}.autorange{2} = smu{0}.{3}'.format(channel,source_or_measure,v_or_i, _on) )
-
-    # def read_autorange(self,source_or_measure = 'source', v_or_i = 'v', channel = 'a'):
-    #     resp = self.ask('print(smu{0}.{1}.autorange{2})'.format(channel,source_or_measure,v_or_i))
-    #     return bool(float(resp))
-        
+                
     def write_output_on(self, on = True):
-        # s = {True:'OUTPUT_ON',False:'OUTPUT_OFF'}[on]
-        # self.send('smu{0}.source.output = smu{0}.{1}'.format(channel,s))
+        '''
+        Enables/disables source output.
+        '''
         s = {True:'OUTPUT ON',False:'OUTPUT OFF'}[on]
         self.send(s)
+        print(self.read_output_on()) ###test read
+
 
     def read_output_on(self):
-        # resp = self.ask('print(smu{}.source.output)'.format(channel))
+        '''
+        Returns whether source output is disabled.
+        '''
         resp = self.ask("OUTPut?")
         return bool(float(resp))
       
     def read_V(self):
-        try:
-            self.measure_voltage()
-            resp = self.ask(":READ?")
-            return float(resp)
-        except:
-            return 0
+        '''
+        Configure device to read voltage and return voltage reading.
+        '''
+        self.measure_voltage()
+        resp = self.ask(":READ?")
+        return float(resp)
 
     def measure_voltage(self, nplc=1, voltage=21.0, auto_range=True):
         """ Configures the measurement of voltage.
@@ -129,23 +126,22 @@ class KeithleySourceMeter(object):
         :param voltage: Upper limit of voltage in Volts, from -210 V to 210 V
         :param auto_range: Enables auto_range if True, else uses the set voltage
         """
+        if (self.read_output_on() == False): self.write_output_on()
         self.send(":SENS:FUNC 'VOLT';"
                    ":SENS:VOLT:NPLC %f;:FORM:ELEM VOLT;" % nplc)
         if auto_range:
             self.send(":SENS:VOLT:RANG:AUTO 1;")
         else:
             self.write_range(voltage, "SENS", "VOLT")
-            # self.voltage_range = voltage
-        # self.check_errors()
     
     def read_I(self):
-        # resp = self.ask('print(smu{}.measure.i())'.format(channel))
-        try:
-            self.measure_current()
-            resp = self.ask(":READ?")
-            return float(resp)
-        except:
-            return 0
+        '''
+        Configure device to read current and return current reading.
+        '''
+        self.measure_current()
+        resp = self.ask(":READ?")
+        return float(resp)
+
 
     def measure_current(self, nplc=1, current=1.05e-4, auto_range=True):
         """ Configures the measurement of current.
@@ -153,6 +149,7 @@ class KeithleySourceMeter(object):
         :param current: Upper limit of current in Amps, from -1.05 A to 1.05 A
         :param auto_range: Enables auto_range if True, else uses the set current
         """
+        if (self.read_output_on() == False): self.write_output_on()
         self.send(":SENS:FUNC 'CURR';"
                    ":SENS:CURR:NPLC %f;:FORM:ELEM CURR;" % nplc)
         if auto_range:
@@ -167,16 +164,23 @@ class KeithleySourceMeter(object):
         integration time, and increases measurement resolution and accuracy, however the trade-off 
         is slower measurement rates. (sets ADC_integration_time to NPLC*0.1/60 sec)
         '''
-        self.write(":SENS:CURR:NPLC " + str(n))
-        # self.send('smu{}.measure.nplc = {}'.format(channel, n))
+        self.send(":SENS:CURR:NPLC %f" % (n))
+        print(self.read_NPLC()) ###test read 
         
     def read_NPLC(self):
-        # resp = self.ask('print(smu{}.measure.nplc)'.format(channel))
         resp = self.ask(":SENS:CURR:NPLC?")
         return int(float(resp) )
 
+    #bugged?
     def write_source_delay(self, delay):
-        self.send(':SOUR:DEL? ' + str(delay))
+        '''
+        Sets a manual delay for the source after the output is turned on 
+        before a measurement is taken Valid values are
+        between 0 [seconds] and 999.9999 [seconds].""",
+        '''
+        # self.send(":SOUR:DEL:AUTO 1")
+        self.send(':SOUR:DEL? %g' % (delay))
+        print(self.read_source_delay()) ###test read
     
     def read_source_delay(self):
         resp = self.ask(":SOUR:DEL?")
@@ -186,25 +190,15 @@ class KeithleySourceMeter(object):
         '''
         delay [sec]: delay between measurements
         '''
-        # self.send('smu{}.measure.delay = {}'.format(channel, delay))
-        self.send(':TRIG:SEQ:DEL ' + str(delay))
+        self.send(':TRIG:SEQ:DEL %g' % (delay))
+        print(self.read_measure_delay())
 
     def read_measure_delay(self):
-        # resp = self.ask('print(smu{}.measure.delay)'.format(channel))
         resp = self.ask(':TRIG:SEQ:DEL?')
         return float(resp)
 
-        
-    # def prepare_buffer(self, buffer_n = '1'):
-    #     # self.send( 'smu{}.nvbuffer{}.clear()'.format(channel, buffer_n) )
-    #     # self.send( 'smu{}.nvbuffer{}.appendmode = 1'.format(channel, buffer_n))
-    #     """ Resets the buffer. """
-    #     self.keithley.write(":STAT:PRES;*CLS;:TRAC:CLEAR;:TRAC:FEED:CONT NEXT;")
-
-
-
     def read_is_measuring(self, channel = 'a'):
-        resp = self.ask('print(status.measurement.instrument.smu{}.condition)'.format(channel))
+        resp = self.ask("status:queue?;")[0]
         return bool(float(resp))
         
     # def measureIV_A(self, N, Vmin, Vmax, NPLC=1, delay=0,channel='a'):
@@ -323,8 +317,6 @@ class KeithleySourceMeter(object):
         self.write_range(Imeasure,'SENS', 'CURR', 'a')
         self.write_range(Isource,'SENS', 'CURR', 'a')
 
-    def reset(self):
-        self.send("status:queue:clear;*RST;:stat:pres;:*CLS;")
         
     # def setAutoranges_A(self):
     #     '''

@@ -1,0 +1,11 @@
+2020-06-26T15:04:24|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\ScopeFoundry\hardware.py", line 181, in read_from_hardware
+    lq.read_from_hardware()
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\ScopeFoundry\logged_quantity.py", line 161, in read_from_hardware
+    val = self.hardware_read_func()
+  File "..\keithley_sourcemeter\keithley_sourcemeter_hc.py", line 81, in <lambda>
+    self.source_I_a_range.connect_to_hardware(lambda:self.read_range('SOUR', 'CURR'),
+  File "..\keithley_sourcemeter\keithley_sourcemeter_hc.py", line 122, in read_range
+    return self.i_ranges_inv[_range]
+KeyError: 0.000105
+
