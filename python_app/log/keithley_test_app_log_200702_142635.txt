@@ -1,0 +1,13 @@
+2020-07-02T14:26:35|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "KeithleyApp.py", line 28, in <module>
+    app = KeithleyTestApp(sys.argv)
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\ScopeFoundry\base_app.py", line 332, in __init__
+    self.setup()
+  File "KeithleyApp.py", line 10, in setup
+    self.k24001 = self.add_hardware(Keithley2400SourceMeterComponent(self))
+  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\ScopeFoundry\hardware.py", line 80, in __init__
+    self.setup()
+  File "..\keithley_sourcemeter\keithley2400_sourcemeter_hc.py", line 65, in setup
+    self.source_mode = self.settings.New('source_mode', str, choices = {'VOLT', 'CURR'}, initial = SOURCE_MODE_DEFAULT)
+NameError: name 'SOURCE_MODE_DEFAULT' is not defined
+

@@ -1,3 +1,9 @@
+'''
+July 2 2020
+
+@author Linda Taing
+'''
+
 from ScopeFoundry import BaseMicroscopeApp
 import sys
 sys.path.append("../")
@@ -6,11 +12,15 @@ class KeithleyTestApp(BaseMicroscopeApp):
     name = "keithley_test_app"
     
     def setup(self):
-        from keithley_sourcemeter.keithley_sourcemeter_hc import KeithleySourceMeterComponent
-        self.hw = self.add_hardware(KeithleySourceMeterComponent(self))
+        from keithley_sourcemeter.keithley2400_sourcemeter_hc import Keithley2400SourceMeterComponent
+        
+        self.k1 = self.add_hardware(Keithley2400SourceMeterComponent(self, name = 'keithley2400_sourcemeter1'))
+        self.k1.settings['port'] = 'GPIB0::22'
 
-        # hw.settings['port'] = 'COM6'
-        self.hw.settings['port'] = 'GPIB0::22'
+        
+        self.k2 = self.add_hardware(Keithley2400SourceMeterComponent(self, name = 'keithley2400_sourcemeter2'))
+        self.k2.settings['port'] = 'GPIB0::24'
+
         # hw.settings['connected'] = True
 
         # from keithley_sourcemeter.slow_iv import SlowIVMeasurement

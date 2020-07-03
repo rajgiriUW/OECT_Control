@@ -1,0 +1,1 @@
+2020-07-02T14:39:33|ERROR|KeithleyTestApp|tried to disconnect keithley2400_sourcemeter2: Invalid session handle. The resource might be closed.
