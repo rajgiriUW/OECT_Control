@@ -1,9 +1,0 @@
-2020-06-26T16:56:56|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
-  File "C:\Users\GingerLab\.julia\conda\3\envs\scopefoundry\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
-    self.hardware_set_func(self.val)
-  File "..\keithley_sourcemeter\keithley_sourcemeter_hc.py", line 88, in <lambda>
-    lambda delay:K.write_source_delay(delay))
-  File "..\keithley_sourcemeter\keithley_sourcemeter_gpib_interface.py", line 181, in write_source_delay
-    self.print(self.read_source_delay()) ###test read
-AttributeError: 'KeithleySourceMeter' object has no attribute 'print'
-

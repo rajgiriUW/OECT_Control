@@ -1,1 +1,0 @@
-2020-06-25T15:37:08|ERROR|KeithleyTestApp|tried to disconnect keithley_sourcemeter: VI_ERROR_TMO (-1073807339): Timeout expired before operation completed.

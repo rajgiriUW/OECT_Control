@@ -21,12 +21,13 @@ class KeithleyTestApp(BaseMicroscopeApp):
         self.k2 = self.add_hardware(Keithley2400SourceMeterComponent(self, name = 'keithley2400_sourcemeter2'))
         self.k2.settings['port'] = 'GPIB0::24'
 
-        # hw.settings['connected'] = True
+        from python_measurements.output_curve_measure import OutputCurveMeasure
+        self.add_measurement(OutputCurveMeasure(self))
 
-        # from keithley_sourcemeter.slow_iv import SlowIVMeasurement
-        
-        # self.add_measurement(SlowIVMeasurement(self))
-
+        from python_measurements.transfer_curve_measure import TransferCurveMeasure
+        self.add_measurement(TransferCurveMeasure(self))
+        from python_measurements.auto_measure import AutoMeasure
+        self.add_measurement(AutoMeasure(self))
 
         
 if __name__ == '__main__':

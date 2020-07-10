@@ -1,2 +1,0 @@
-2020-06-23T10:53:39|WARNING|pymeasure.adapters.vxi11|Failed to import vxi11 package, which is required for the VXI11Adapter
-2020-06-23T10:55:25|ERROR|KeithleyTestApp|tried to disconnect keithley_sourcemeter: VI_ERROR_TMO (-1073807339): Timeout expired before operation completed.

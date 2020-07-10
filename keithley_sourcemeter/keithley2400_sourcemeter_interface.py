@@ -17,7 +17,7 @@ class Keithley2400SourceMeter(object):
     '''
     KeithleyBaudRate = 9600
     
-    def __init__(self, port="GPIB0::22::INSTR", debug=False):
+    def __init__(self, port, debug=False):
         self.port = port
         self.debug = debug
         
@@ -56,7 +56,6 @@ class Keithley2400SourceMeter(object):
         # self.send('smu{0}.source.func = smu{0}.OUTPUT_{1}VOLTS'.format(channel, mode))        
         # self.send('smu{0}.source.levelv = {1}'.format(channel, V))
         self.send(":SOUR:VOLT:LEV %g" % (V)) #+ str(V))
-        print(self.ask(':SOUR:VOLT?')) ###test read
 
     def source_I(self, I, mode = 'DC'):
         '''
@@ -65,7 +64,6 @@ class Keithley2400SourceMeter(object):
         # self.send('smu{0}.source.func = smu{0}.OUTPUT_{1}AMPS'.format(channel,mode))        
         # self.send('smu{}.source.leveli = {}'.format(channel, I))
         self.send(":SOUR:CURR:LEV %g" % (I)) # + str(I))
-        print(self.ask(':SOUR:CURR?')) ###test read
         
     def reset(self):
         self.send("status:queue:clear;*RST;:stat:pres;:*CLS;")
@@ -81,11 +79,6 @@ class Keithley2400SourceMeter(object):
         VOLT corresponds to voltage; CURR corresponds to current.
         '''
         self.send(":{0}:{1}:RANG:AUTO 0;:{0}:{1}:RANG {2}".format(sour_or_sens, volt_or_curr, _range).upper())
-        print(self.read_range(sour_or_sens, volt_or_curr)) ###test read
-        # ":SOUR:CURR:RANG:AUTO 0;:SOUR:CURR:RANG %g" src current range
-        # ":SOUR:VOLT:RANG:AUTO 0;:SOUR:VOLT:RANG %g" src voltage range
-        # ":SENS:CURR:RANG:AUTO 0;:SENS:CURR:RANG %g" meas current range
-        # ":SENS:VOLT:RANG:AUTO 0;:SENS:VOLT:RANG %g" meas voltage range
         
             
     def read_range(self, sour_or_sens = 'SOUR', volt_or_curr = 'VOLT'):            
@@ -101,7 +94,6 @@ class Keithley2400SourceMeter(object):
         '''
         s = {True:'OUTPUT ON',False:'OUTPUT OFF'}[on]
         self.send(s)
-        print(self.read_output_on()) ###test read
 
 
     def read_output_on(self):
@@ -164,7 +156,6 @@ class Keithley2400SourceMeter(object):
         is slower measurement rates. (sets ADC_integration_time to NPLC*0.1/60 sec)
         '''
         self.send(":SENS:CURR:NPLC %f" % (n))
-        print(self.read_NPLC()) ###test read 
         
     def read_NPLC(self):
         resp = self.ask(":SENS:CURR:NPLC?")
@@ -175,7 +166,6 @@ class Keithley2400SourceMeter(object):
         delay [sec]: delay between measurements
         '''
         self.send(':TRIG:SEQ:DEL %g' % (delay))
-        print(self.read_measure_delay())
 
     def read_measure_delay(self):
         resp = self.ask(':TRIG:SEQ:DEL?')

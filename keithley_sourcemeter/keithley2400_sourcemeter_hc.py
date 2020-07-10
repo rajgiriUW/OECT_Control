@@ -62,9 +62,9 @@ class Keithley2400SourceMeterComponent(HardwareComponent): #object-->HardwareCom
         
         # self.is_a_measuring = self.settings.New('is_measuring', bool, initial = False, ro=True)
         self.autozero = self.settings.New('autozero', str, choices = {'on', 'off', 'once'}, initial = self.AUTOZERO_DEFAULT)
-        self.source_mode = self.settings.New('source_mode', str, choices = {'VOLT', 'CURR'}, initial = self.SOURCE_MODE_DEFAULT)
-        self.manual_range = self.settings.New('manual_range_max_I', str, choices = self.i_ranges.keys(), initial = self.MANUAL_RANGE_DEFAULT)
         self.autorange = self.settings.New('autorange', bool, initial = self.AUTORANGE_DEFAULT)
+        self.source_mode = self.settings.New('source_mode', str, choices = {'VOLT', 'CURR'}, initial = self.SOURCE_MODE_DEFAULT)
+        self.manual_range = self.settings.New('manual_range', str, choices = self.i_ranges.keys(), initial = self.MANUAL_RANGE_DEFAULT)
         self.current_compliance = self.settings.New('current_compliance', unit='A', initial = self.CURRENT_COMPLIANCE_DEFAULT)
         self.NPLC_a = self.settings.New('NPLC_a', initial = self.NPLC_DEFAULT)
         self.is_a_measuring = self.settings.New('is_measuring', bool, initial = False, ro=True)
