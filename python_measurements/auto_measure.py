@@ -44,6 +44,7 @@ class AutoMeasure(GeneralCurveMeasure):
         self.settings.New('number_of_transfer_curves', initial = 1, vmin = 1)        
         self.settings.New('number_of_output_curves', initial = 1, vmin = 1, vmax = 5)
         self.settings.New('dimension', str, choices = self.dimension_choice.keys(), initial = '4000 x 20')
+        self.settings.New('thickness', unit = "nm", initial = 50)
         self.v_g_spinboxes = self.ui.v_g_groupBox.findChildren(QtGui.QDoubleSpinBox)
 
     def setup_figure(self):
@@ -66,25 +67,29 @@ class AutoMeasure(GeneralCurveMeasure):
         pass
         
     def run(self):
-        while not self.interrupt_measurement_called:
-            self.dimension = self.settings['dimension']
-            self.read_settings = self.transfer_read_from_settings
-            GeneralCurveMeasure.pre_run(self)
-            for i in range(self.num_transfer_curves):
-                GeneralCurveMeasure.run(self)
-                GeneralCurveMeasure.post_run(self)
-                self.READ_NUMBER += 1
-            self.switch_setting()
-            self.READ_NUMBER = 1
-            self.read_settings = self.output_read_from_settings
-            GeneralCurveMeasure.pre_run(self)
-            for v_g_value in range(self.output_v_g_values):
-                self.v_constant = self.settings['V_G'] = v_g_value
-                GeneralCurveMeasure.run(self)
-                GeneralCurveMeasure.post_run_self(self)
-                self.READ_NUMBER = 1
-            self.READ_NUMBER = 1
-            self.switch_setting()
+        self.read_settings = self.transfer_read_from_settings
+        self.dimension = self.settings['dimension'] = self.ui.dimension_comboBox.currentText()
+        self.thickness = self.settings['thickness'] = self.ui.thickness_doubleSpinBox.value()
+        print([self.dimension, self.thickness])
+        GeneralCurveMeasure.pre_run(self)
+        for i in range(self.num_transfer_curves):
+            GeneralCurveMeasure.run(self)
+            GeneralCurveMeasure.post_run(self)
+            self.sweep_device.source_V(self.v_sweep_start)
+            self.READ_NUMBER += 1
+        self.switch_setting()
+        self.READ_NUMBER = 1
+        self.read_settings = self.output_read_from_settings
+        GeneralCurveMeasure.pre_run(self)
+        for v_g_value in self.output_v_g_values:
+            self.v_constant = self.settings['V_G'] = v_g_value
+            self.constant_device.source_V(self.v_constant)
+            GeneralCurveMeasure.run(self)
+            GeneralCurveMeasure.post_run(self)
+            self.sweep_device.source_V(self.v_sweep_start)
+            self.READ_NUMBER += 1
+        self.READ_NUMBER = 1
+        self.switch_setting()
 
     def post_run(self):
         if self.SWEEP == "DS": self.switch_setting()
@@ -131,7 +136,7 @@ class AutoMeasure(GeneralCurveMeasure):
         self.first_bias_settle = self.settings['DS_sweep_first_bias_settle'] = self.ui.first_bias_settle_output_doubleSpinBox.value()
         self.return_sweep = self.settings['DS_sweep_return_sweep'] = self.ui.return_sweep_output_checkBox.isChecked()
         self.v_constant = self.settings['V_G'] = self.ui.v_g1_doubleSpinBox.value()
-        self.num_output_curves = self.settings['number_of_output_curves'] = self.ui.num_output_curves_doubleSpinBox.value()
+        self.num_output_curves = self.settings['number_of_output_curves'] = int(self.ui.num_output_curves_doubleSpinBox.value())
         self.output_v_g_values = self.read_output_v_g_spinboxes()
 
     def read_output_v_g_spinboxes(self):

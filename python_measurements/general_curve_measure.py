@@ -154,6 +154,8 @@ class GeneralCurveMeasure(Measurement):
         self.software_averages = self.settings['%s_sweep_software_averages' % self.SWEEP]
         self.delay_between_averages = self.settings['%s_sweep_delay_between_averages' % self.SWEEP]
         self.return_sweep = self.settings['%s_sweep_return_sweep' % self.SWEEP]
+        self.dimension = self.settings['dimension']
+        self.thickness = self.settings['thickness']
 
     
     def pre_run(self):
@@ -165,10 +167,13 @@ class GeneralCurveMeasure(Measurement):
         self.constant_device.write_current_compliance(self.constant_current_compliance)
         self.sweep_device.write_autozero(self.sweep_autozero)
         self.sweep_device.write_source_mode(self.sweep_source_mode)
-        if not self.sweep_autorange:
-            self.sweep_device.write_range(self.sweep_manual_range, 'SENS', 'CURR')
         self.sweep_device.write_current_compliance(self.sweep_current_compliance)
-        self.sweep_device.write_NPLC(self.sweep_nplc)
+        if not self.sweep_autorange:
+            self.sweep_device.measure_current(nplc = self.sweep_nplc, current = self.sweep_manual_range, auto_range = False)
+            self.constant_device.measure_current(nplc = self.sweep_nplc, current = self.sweep_manual_range, auto_range = False)
+        else:
+            self.sweep_device.measure_current(nplc = self.sweep_nplc)
+            self.constant_device.measure_current(nplc = self.sweep_nplc)
 
         #these refer to the same devices as constant and sweep devices, but are convenient when we want to reference
         #to device by which terminals it corresponds to - makes things easier for measurement and saving
@@ -179,18 +184,19 @@ class GeneralCurveMeasure(Measurement):
         self.num_steps = np.abs(int(np.ceil(((self.v_sweep_finish - self.v_sweep_start)/self.v_sweep_step_size)))) + 1 #add 1 to account for start voltage
         self.voltages = np.arange(start = self.v_sweep_start, stop = self.v_sweep_finish + self.v_sweep_step_size, step = self.v_sweep_step_size) #add an extra step to stop since arange is exclusive
         if self.return_sweep:
-            self.save_array = np.zeros(shape=(self.voltages.shape[0] * 2 - 1, 5))
-            self.reverse_voltages = np.arange(start = self.v_sweep_finish - self.v_sweep_step_size, stop = self.v_sweep_start - self.v_sweep_step_size, step = -self.v_sweep_step_size)
+            # self.save_array = np.zeros(shape=(self.voltages.shape[0] * 2 - 1, 5))
+            self.save_array = np.zeros(shape=(self.num_steps * 2 - 1, 5))
+
+            # self.reverse_voltages = np.arange(start = self.v_sweep_finish - self.v_sweep_step_size, stop = self.v_sweep_start - self.v_sweep_step_size, step = -self.v_sweep_step_size)
+            self.reverse_voltages = np.arange(start = self.v_sweep_finish - self.v_sweep_step_size, stop = self.v_sweep_start - (self.v_sweep_step_size/2), step = -self.v_sweep_step_size)
+
             self.voltages = np.concatenate((self.voltages, self.reverse_voltages))
         else:
             self.save_array = np.zeros(shape=(self.voltages.shape[0], 5))
         self.save_array[:,0] = self.voltages
-
         #prepare hardware for read
         self.sweep_device.write_output_on()
         self.constant_device.write_output_on()
-        self.sweep_device.measure_current()
-        self.constant_device.measure_current()
         self.source_voltage = self.v_sweep_start - self.v_sweep_step_size
         self.constant_device.source_V(self.v_constant)
 
@@ -207,40 +213,38 @@ class GeneralCurveMeasure(Measurement):
 
         Runs until measurement is interrupted. Data is continuously saved if checkbox checked.
         """
-        while not self.interrupt_measurement_called:
+        self.do_sweep()
+        if self.return_sweep: #perform return sweep
+            self.doing_return_sweep = True
+            self.v_sweep_step_size *= -1
             self.do_sweep()
-            if self.return_sweep: #perform return sweep
-                self.doing_return_sweep = True
-                self.v_sweep_step_size *= -1
-                self.do_sweep()
 
 
     def do_sweep(self):
         '''
         Perform sweep.
         '''
-        while not self.interrupt_measurement_called:
-            num_steps = self.num_steps
+        num_steps = self.num_steps
+        if self.doing_return_sweep: 
+            num_steps -= 1
+        for i in range(num_steps):
+            self.source_voltage += self.v_sweep_step_size
+            self.sweep_device.source_V(self.source_voltage)
+            time.sleep(self.preread_delay * .001)
+            current_readings = self.read_currents()
+            self.g_reading = current_readings[0]
+            g_std = current_readings[1]
+            self.ds_reading = current_readings[2]
+            ds_std = current_readings[3]
+            save_row = i
             if self.doing_return_sweep: 
-                num_steps -= 1
-            for i in range(num_steps):
-                self.source_voltage += self.v_sweep_step_size
-                self.sweep_device.source_V(self.source_voltage)
-                time.sleep(self.preread_delay * .001)
-                current_readings = self.read_currents()
-                self.g_reading = current_readings[0]
-                g_std = current_readings[1]
-                self.ds_reading = current_readings[2]
-                ds_std = current_readings[3]
-                save_row = i
-                if self.doing_return_sweep: 
-                    save_row += self.num_steps #to ensure the right row is overwritten in return sweep 
-                self.save_array[save_row, 1] = self.g_reading
-                self.save_array[save_row, 2] = g_std
-                self.save_array[save_row, 3] = self.ds_reading
-                self.save_array[save_row, 4] = ds_std
-                if self.interrupt_measurement_called:
-                    break
+                save_row += self.num_steps #to ensure the right row is overwritten in return sweep 
+            self.save_array[save_row, 1] = self.g_reading
+            self.save_array[save_row, 2] = g_std
+            self.save_array[save_row, 3] = self.ds_reading
+            self.save_array[save_row, 4] = ds_std
+            if self.interrupt_measurement_called:
+                break
 
 
     def read_currents(self):
@@ -272,9 +276,9 @@ class GeneralCurveMeasure(Measurement):
         
         v_constant_info = 'V_%s =\t%g' % (self.CONSTANT, self.v_constant)
         avgs_info = 'Number of Averages =\t%g' % self.software_averages
-        width_info = 'Width/um=\t%g' % self.dimension_choice[self.settings['dimension']][0]
-        length_info = 'Length/um=\t%g' % self.dimension_choice[self.settings['dimension']][1]
-        thickness_info = 'Thickness/nm=\t%g' % self.settings['thickness']
+        width_info = 'Width/um=\t%g' % self.dimension_choice[self.dimension][0]
+        length_info = 'Length/um=\t%g' % self.dimension_choice[self.dimension][1]
+        thickness_info = 'Thickness/nm=\t%g' % self.thickness
         info_footer = v_constant_info + "\n" + avgs_info + "\n" + width_info + "\n" + length_info + "\n" + thickness_info
         info_header = 'V_%s\tI_G (A)\tI_G Error (A)\tI_DS (A)\tI_DS Error (A)' % (self.CONSTANT)
         np.savetxt(self.app.settings['save_dir']+"/"+ self.app.settings['sample'] + append, self.save_array, fmt = '%.10f', 
