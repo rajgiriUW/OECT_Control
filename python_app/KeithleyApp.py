@@ -7,9 +7,9 @@ July 2 2020
 from ScopeFoundry import BaseMicroscopeApp
 import sys
 sys.path.append("../")
-class KeithleyTestApp(BaseMicroscopeApp):
+class KeithleyApp(BaseMicroscopeApp):
     
-    name = "keithley_test_app"
+    name = "keithley_app"
     
     def setup(self):
         from keithley_sourcemeter.keithley2400_sourcemeter_hc import Keithley2400SourceMeterComponent
@@ -23,7 +23,6 @@ class KeithleyTestApp(BaseMicroscopeApp):
 
         from python_measurements.output_curve_measure import OutputCurveMeasure
         self.add_measurement(OutputCurveMeasure(self))
-
         from python_measurements.transfer_curve_measure import TransferCurveMeasure
         self.add_measurement(TransferCurveMeasure(self))
         from python_measurements.auto_measure import AutoMeasure
@@ -32,5 +31,5 @@ class KeithleyTestApp(BaseMicroscopeApp):
         
 if __name__ == '__main__':
     import sys
-    app = KeithleyTestApp(sys.argv)
+    app = KeithleyApp(sys.argv)
     app.exec_()
