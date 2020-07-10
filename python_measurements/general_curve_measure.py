@@ -8,12 +8,14 @@ import time
 import os.path
 
 class GeneralCurveMeasure(Measurement):
-    #class constants determining vhich device's voltage will go through a sweep and which will be constant
+    #class variables determining vhich device's voltage will go through a sweep and which will be constant
     #set these values in specific measurements
     SWEEP = ""
     CONSTANT = ""
 
+    #class variable determining numbering of measurement output file. useful in auto_measure for multiple outputs and transfers 
     READ_NUMBER = 0
+
     def setup(self):
         """
         Runs once during App initialization.
@@ -48,10 +50,10 @@ class GeneralCurveMeasure(Measurement):
         self.settings.New('V_%s_step_size' % self.SWEEP, unit = 'V', si = True, initial = 0.1)
         self.settings.New('%s_sweep_preread_delay' % self.SWEEP, unit = 'ms', si = True, initial = 5000)
         self.settings.New('%s_sweep_delay_between_averages' % self.SWEEP, unit = 'ms', si = True, initial = 200)
-        self.settings.New('%s_sweep_software_averages' % self.SWEEP, initial = 5)
+        self.settings.New('%s_sweep_software_averages' % self.SWEEP, int, initial = 5, vmin = 1)
         self.settings.New('%s_sweep_first_bias_settle' % self.SWEEP, unit = 'ms', si = True, initial = 2000)
         
-        self.settings.New('%s_sweep_return_sweep' % self.SWEEP, bool, initial = False)
+        self.settings.New('%s_sweep_return_sweep' % self.SWEEP, bool, initial = True)
         self.settings.New('V_%s' % self.CONSTANT, unit = 'V', si = True, initial = 0.1)
 
         # Define how often to update display during a run
@@ -79,6 +81,13 @@ class GeneralCurveMeasure(Measurement):
         self.ui.v_sweep_finish_label.setText('V_' + self.SWEEP + ' ' + self.ui.v_sweep_finish_label.text())
         self.ui.v_sweep_step_size_label.setText('V_' + self.SWEEP + ' ' + self.ui.v_sweep_step_size_label.text())
         self.ui.v_constant_label.setText(self.ui.v_constant_label.text() + self.CONSTANT)
+        if (self.SWEEP == "DS"):
+            self.ui.constant_groupBox.setTitle(self.ui.constant_groupBox.title() + ' 1 (G)')
+            self.ui.sweep_groupBox.setTitle(self.ui.sweep_groupBox.title() + ' 2 (DS)')
+        else:
+            self.ui.constant_groupBox.setTitle(self.ui.constant_groupBox.title() + ' 2 (DS)')
+            self.ui.sweep_groupBox.setTitle(self.ui.sweep_groupBox.title() + ' 1 (G)')
+
 
         self.constant_hw.settings.current_compliance.connect_to_widget(self.ui.current_compliance_constant_doubleSpinBox)
 
@@ -87,7 +96,7 @@ class GeneralCurveMeasure(Measurement):
         self.sweep_hw.settings.source_mode.connect_to_widget(self.ui.source_mode_sweep_comboBox)
         self.sweep_hw.settings.manual_range.connect_to_widget(self.ui.manual_range_sweep_comboBox)
         self.sweep_hw.settings.current_compliance.connect_to_widget(self.ui.current_compliance_sweep_doubleSpinBox)
-        self.sweep_hw.settings.NPLC_a.connect_to_widget(self.ui.nplc_sweep_doubleSpinBox)
+        self.sweep_hw.settings.NPLC.connect_to_widget(self.ui.nplc_sweep_doubleSpinBox)
 
         self.settings_dict = self.settings.as_dict()
         
@@ -135,6 +144,9 @@ class GeneralCurveMeasure(Measurement):
             pg.QtGui.QApplication.processEvents()
 
     def read_settings(self):
+        '''
+        Pull values from settings.
+        '''
         self.constant_current_compliance = self.constant_hw.settings['current_compliance']
 
         self.sweep_autorange = self.constant_hw.settings['autorange']
@@ -143,7 +155,6 @@ class GeneralCurveMeasure(Measurement):
         self.sweep_manual_range = self.constant_hw.settings['manual_range']
         self.sweep_current_compliance = self.constant_hw.settings['current_compliance']
         self.sweep_nplc = self.constant_hw.settings['NPLC_a']
-
 
         self.v_sweep_start = self.settings['V_%s_start' % self.SWEEP]
         self.v_sweep_finish = self.settings['V_%s_finish' % self.SWEEP]
@@ -164,6 +175,8 @@ class GeneralCurveMeasure(Measurement):
         self.constant_device = self.constant_hw.keithley
         self.sweep_device = self.sweep_hw.keithley
         self.read_settings()
+
+        #configure keithleys
         self.constant_device.write_current_compliance(self.constant_current_compliance)
         self.sweep_device.write_autozero(self.sweep_autozero)
         self.sweep_device.write_source_mode(self.sweep_source_mode)
@@ -184,11 +197,8 @@ class GeneralCurveMeasure(Measurement):
         self.num_steps = np.abs(int(np.ceil(((self.v_sweep_finish - self.v_sweep_start)/self.v_sweep_step_size)))) + 1 #add 1 to account for start voltage
         self.voltages = np.arange(start = self.v_sweep_start, stop = self.v_sweep_finish + self.v_sweep_step_size, step = self.v_sweep_step_size) #add an extra step to stop since arange is exclusive
         if self.return_sweep:
-            # self.save_array = np.zeros(shape=(self.voltages.shape[0] * 2 - 1, 5))
             self.save_array = np.zeros(shape=(self.num_steps * 2 - 1, 5))
-
-            # self.reverse_voltages = np.arange(start = self.v_sweep_finish - self.v_sweep_step_size, stop = self.v_sweep_start - self.v_sweep_step_size, step = -self.v_sweep_step_size)
-            self.reverse_voltages = np.arange(start = self.v_sweep_finish - self.v_sweep_step_size, stop = self.v_sweep_start - (self.v_sweep_step_size/2), step = -self.v_sweep_step_size)
+            self.reverse_voltages = np.arange(start = self.v_sweep_finish - self.v_sweep_step_size, stop = self.v_sweep_start - (self.v_sweep_step_size/2), step = -self.v_sweep_step_size) #step size divided by two then subtracted to ensure correct stop point
 
             self.voltages = np.concatenate((self.voltages, self.reverse_voltages))
         else:
@@ -251,7 +261,6 @@ class GeneralCurveMeasure(Measurement):
         '''
         Read both sourcemeters, taking software averages.
         '''
-        # if hasattr(self, 'sweep_device') and hasattr(self, 'constant_device'):
         g_current_read = np.zeros(int(self.software_averages))
         ds_current_read = np.zeros(int(self.software_averages))
         for i in range(int(self.software_averages)):

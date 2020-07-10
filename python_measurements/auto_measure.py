@@ -12,12 +12,18 @@ from .output_curve_measure import OutputCurveMeasure
 from .transfer_curve_measure import TransferCurveMeasure
 
 class AutoMeasure(GeneralCurveMeasure):
+    #class variables determining vhich device's voltage will go through a sweep and which will be constant
+    #these are the initial values since transfer curve will be set up first
     SWEEP = "G"
     CONSTANT = "DS"
 
+    #class variable determining numbering of measurement output file. useful in auto_measure for multiple transfers and outputs
     READ_NUMBER = 1
 
     def switch_setting(self):
+        '''
+        Switch class variables and sweep/constant hardware references. Used for going between handling transfer and output measurements.
+        '''
         sweep_temp = self.SWEEP
         constant_temp = self.CONSTANT
         self.SWEEP = constant_temp
@@ -35,50 +41,68 @@ class AutoMeasure(GeneralCurveMeasure):
         #Load ui file and convert it to a live QWidget of the user interface
         self.ui = load_qt_ui_file(self.ui_filename)
         TransferCurveMeasure.create_settings(self)
-        self.switch_setting()
+        self.switch_setting() #configure variables for output curve
         OutputCurveMeasure.create_settings(self)
-        self.switch_setting()
+        self.switch_setting() #configure variables for transfer curve
 
+        #create automeasure specific settings
         self.dimension_choice = {'4000 x 20': [4000, 20], '2000 x 20': [2000, 20], '1000 x 20': [1000, 20], '800 x 20': [800, 20], 
             '400 x 20': [400, 20], '200 x 20': [200, 20], '100 x 20': [100, 20]}
-        self.settings.New('number_of_transfer_curves', initial = 1, vmin = 1)        
-        self.settings.New('number_of_output_curves', initial = 1, vmin = 1, vmax = 5)
+        self.settings.New('number_of_transfer_curves', int, initial = 1, vmin = 1)        
+        self.settings.New('number_of_output_curves', int, initial = 1, vmin = 1, vmax = 5)
         self.settings.New('dimension', str, choices = self.dimension_choice.keys(), initial = '4000 x 20')
         self.settings.New('thickness', unit = "nm", initial = 50)
-        self.v_g_spinboxes = self.ui.v_g_groupBox.findChildren(QtGui.QDoubleSpinBox)
+        self.v_g_spinboxes = self.ui.v_g_groupBox.findChildren(QtGui.QDoubleSpinBox) #array of v_g spinboxes
 
     def setup_figure(self):
+        '''
+        UI event handling.
+        Connects only sidebar measurement settings to ui. 
+        ***for automeasure, exclusively change hardware settings for each measurement using the ui.
+        '''
         self.ui.start_pushButton.clicked.connect(self.start)
         self.ui.interrupt_pushButton.clicked.connect(self.interrupt)
         self.ui.num_output_curves_doubleSpinBox.valueChanged.connect(self.on_output_curves_changed)
+        self.connect_transfer_ui_to_settings()
+        self.connect_output_ui_to_settings()
+        self.settings.dimension.connect_to_widget(self.ui.dimension_comboBox)
+        self.settings.thickness.connect_to_widget(self.ui.thickness_doubleSpinBox)
 
     def on_output_curves_changed(self):
+        '''
+        Enable/disable correct number of V_G spinboxes depending on how many output curves specified.
+        '''
         num_curves = int(self.ui.num_output_curves_doubleSpinBox.value())
-        # print(num_curves)
         for i in range(num_curves):
             self.v_g_spinboxes[i].setEnabled(True)
         for i in range(num_curves, 5):
             self.v_g_spinboxes[i].setEnabled(False)
         
     def update_display(self):
+        '''
+        No graphics to update for automeasure
+        '''
         pass
 
     def pre_run(self):
+        '''
+        pre_run for each measurement is handled in run()
+        '''
         pass
         
     def run(self):
-        self.read_settings = self.transfer_read_from_settings
         self.dimension = self.settings['dimension'] = self.ui.dimension_comboBox.currentText()
         self.thickness = self.settings['thickness'] = self.ui.thickness_doubleSpinBox.value()
-        print([self.dimension, self.thickness])
+        self.read_settings = self.transfer_read_from_settings
         GeneralCurveMeasure.pre_run(self)
         for i in range(self.num_transfer_curves):
             GeneralCurveMeasure.run(self)
             GeneralCurveMeasure.post_run(self)
-            self.sweep_device.source_V(self.v_sweep_start)
+            self.sweep_device.source_V(self.v_sweep_start) #reset to sweep start voltage before running another curve
             self.READ_NUMBER += 1
-        self.switch_setting()
-        self.READ_NUMBER = 1
+        self.switch_setting() #configure variables for output curve
+        self.READ_NUMBER = 1 #reset file numbering for output curves
+
         self.read_settings = self.output_read_from_settings
         GeneralCurveMeasure.pre_run(self)
         for v_g_value in self.output_v_g_values:
@@ -88,11 +112,11 @@ class AutoMeasure(GeneralCurveMeasure):
             GeneralCurveMeasure.post_run(self)
             self.sweep_device.source_V(self.v_sweep_start)
             self.READ_NUMBER += 1
-        self.READ_NUMBER = 1
-        self.switch_setting()
+        self.READ_NUMBER = 1 #reset file numbering
+        self.switch_setting() #configure variables for transfer curve again
 
     def post_run(self):
-        if self.SWEEP == "DS": self.switch_setting()
+        if self.SWEEP == "DS": self.switch_setting() #
         self.READ_NUMBER = 1
 
 
@@ -104,7 +128,7 @@ class AutoMeasure(GeneralCurveMeasure):
         self.sweep_source_mode = self.sweep_hw.settings['source_mode'] = self.ui.source_mode_g_comboBox.currentText()
         self.sweep_manual_range = self.sweep_hw.settings['manual_range'] = self.ui.manual_range_g_comboBox.currentText()
         self.sweep_current_compliance = self.sweep_hw.settings['current_compliance'] = self.ui.current_compliance_g_output_doubleSpinBox.value()
-        self.sweep_nplc = self.sweep_hw.settings['NPLC_a'] = self.ui.nplc_g_doubleSpinBox.value()
+        self.sweep_nplc = self.sweep_hw.settings['NPLC'] = self.ui.nplc_g_doubleSpinBox.value()
         
         self.v_sweep_start = self.settings['V_G_start'] = self.ui.v_g_start_doubleSpinBox.value()
         self.v_sweep_finish = self.settings['V_G_finish'] = self.ui.v_g_finish_doubleSpinBox.value()
@@ -125,7 +149,7 @@ class AutoMeasure(GeneralCurveMeasure):
         self.sweep_source_mode = self.sweep_hw.settings['source_mode'] = self.ui.source_mode_ds_comboBox.currentText()
         self.sweep_manual_range = self.sweep_hw.settings['manual_range'] = self.ui.manual_range_ds_comboBox.currentText()
         self.sweep_current_compliance = self.sweep_hw.settings['current_compliance'] = self.ui.current_compliance_ds_output_doubleSpinBox.value()
-        self.sweep_nplc = self.sweep_hw.settings['NPLC_a'] = self.ui.nplc_ds_doubleSpinBox.value()
+        self.sweep_nplc = self.sweep_hw.settings['NPLC'] = self.ui.nplc_ds_doubleSpinBox.value()
         
         self.v_sweep_start = self.settings['V_DS_start'] = self.ui.v_ds_start_doubleSpinBox.value()
         self.v_sweep_finish = self.settings['V_DS_finish'] = self.ui.v_ds_finish_doubleSpinBox.value()
@@ -145,42 +169,26 @@ class AutoMeasure(GeneralCurveMeasure):
             output_v_g_values[i] = self.v_g_spinboxes[i].value()
         return output_v_g_values
 
-    # def transfer_connect_to_hardware(self):
-    #     self.constant_hw.settings.current_compliance.connect_to_widget(self.ui.current_compliance_ds_output_doubleSpinBox)
+    def connect_transfer_ui_to_settings(self):
+        self.settings.V_G_start.connect_to_widget(self.ui.v_g_start_doubleSpinBox)
+        self.settings.V_G_finish.connect_to_widget(self.ui.v_g_finish_doubleSpinBox)
+        self.settings.V_G_step_size.connect_to_widget(self.ui.v_g_step_size_doubleSpinBox)
+        self.settings.G_sweep_preread_delay.connect_to_widget(self.ui.preread_delay_transfer_doubleSpinBox)
+        self.settings.G_sweep_delay_between_averages.connect_to_widget(self.ui.delay_between_averages_transfer_doubleSpinBox)
+        self.settings.G_sweep_software_averages.connect_to_widget(self.ui.software_averages_transfer_doubleSpinBox)
+        self.settings.G_sweep_first_bias_settle.connect_to_widget(self.ui.first_bias_settle_transfer_doubleSpinBox)
+        self.settings.G_sweep_return_sweep.connect_to_widget(self.ui.return_sweep_transfer_checkBox)
+        self.settings.V_DS.connect_to_widget(self.ui.v_ds_doubleSpinBox)
+        self.settings.number_of_transfer_curves.connect_to_widget(self.ui.num_transfer_curves_doubleSpinBox)
 
-    #     self.sweep_hw.settings.autozero.connect_to_widget(self.ui.autozero_g_comboBox)
-    #     self.sweep_hw.settings.autorange.connect_to_widget(self.ui.autorange_g_checkBox)
-    #     self.sweep_hw.settings.source_mode.connect_to_widget(self.ui.source_mode_g_comboBox)
-    #     self.sweep_hw.settings.manual_range.connect_to_widget(self.ui.manual_range_g_comboBox)
-    #     self.sweep_hw.settings.current_compliance.connect_to_widget(self.ui.current_compliance_g_output_doubleSpinBox)
-    #     self.sweep_hw.settings.NPLC_a.connect_to_widget(self.ui.nplc_g_doubleSpinBox)
-    #     self.settings.V_DS_start.connect_to_widget(self.ui.v_g_start_doubleSpinBox)
-    #     self.settings.V_DS_finish.connect_to_widget(self.ui.v_g_finish_doubleSpinBox)
-    #     self.settings.V_DS_step_size.connect_to_widget(self.ui.v_g_step_size_doubleSpinBox)
-    #     self.settings.DS_sweep_preread_delay.connect_to_widget(self.ui.preread_delay_transfer_doubleSpinBox)
-    #     self.settings.DS_sweep_delay_between_averages.connect_to_widget(self.ui.delay_between_averages_transfer_doubleSpinBox)
-    #     self.settings.DS_sweep_software_averages.connect_to_widget(self.ui.software_averages_transfer_doubleSpinBox)
-    #     self.settings.DS_sweep_first_bias_settle.connect_to_widget(self.ui.first_bias_settle_transfer_doubleSpinBox)
-    #     self.settings.DS_sweep_return_sweep.connect_to_widget(self.ui.return_sweep_transfer_checkBox)
-    #     self.settings.V_DS.connect_to_widget(self.ui.v_ds_doubleSpinBox)
-    #     self.settings.number_of_transfer_curves.connect_to_widget(self.ui.num_transfer_curves_doubleSpinBox)
-
-    # def output_connect_to_hardware(self):
-    #     self.constant_hw.settings.current_compliance.connect_to_widget(self.ui.current_compliance_g_output_doubleSpinBox)
-
-    #     self.sweep_hw.settings.autozero.connect_to_widget(self.ui.autozero_ds_comboBox)
-    #     self.sweep_hw.settings.autorange.connect_to_widget(self.ui.autorange_ds_checkBox)
-    #     self.sweep_hw.settings.source_mode.connect_to_widget(self.ui.source_mode_ds_comboBox)
-    #     self.sweep_hw.settings.manual_range.connect_to_widget(self.ui.manual_range_ds_comboBox)
-    #     self.sweep_hw.settings.current_compliance.connect_to_widget(self.ui.current_compliance_ds_output_doubleSpinBox)
-    #     self.sweep_hw.settings.NPLC_a.connect_to_widget(self.ui.nplc_ds_doubleSpinBox)
-    #     self.settings.V_DS_start.connect_to_widget(self.ui.v_ds_start_doubleSpinBox)
-    #     self.settings.V_DS_finish.connect_to_widget(self.ui.v_ds_finish_doubleSpinBox)
-    #     self.settings.V_DS_step_size.connect_to_widget(self.ui.v_ds_step_size_doubleSpinBox)
-    #     self.settings.DS_sweep_preread_delay.connect_to_widget(self.ui.preread_delay_output_doubleSpinBox)
-    #     self.settings.DS_sweep_delay_between_averages.connect_to_widget(self.ui.delay_between_averages_output_doubleSpinBox)
-    #     self.settings.DS_sweep_software_averages.connect_to_widget(self.ui.software_averages_output_doubleSpinBox)
-    #     self.settings.DS_sweep_first_bias_settle.connect_to_widget(self.ui.first_bias_settle_output_doubleSpinBox)
-    #     self.settings.DS_sweep_return_sweep.connect_to_widget(self.ui.return_sweep_output_checkBox)
-    #     self.settings.V_G.connect_to_widget(self.ui.v_g1_doubleSpinBox)
-    #     self.settings.number_of_output_curves.connect_to_widget(self.ui.num_output_curves_doubleSpinBox)
+    def connect_output_ui_to_settings(self):
+        self.settings.V_DS_start.connect_to_widget(self.ui.v_ds_start_doubleSpinBox)
+        self.settings.V_DS_finish.connect_to_widget(self.ui.v_ds_finish_doubleSpinBox)
+        self.settings.V_DS_step_size.connect_to_widget(self.ui.v_ds_step_size_doubleSpinBox)
+        self.settings.DS_sweep_preread_delay.connect_to_widget(self.ui.preread_delay_output_doubleSpinBox)
+        self.settings.DS_sweep_delay_between_averages.connect_to_widget(self.ui.delay_between_averages_output_doubleSpinBox)
+        self.settings.DS_sweep_software_averages.connect_to_widget(self.ui.software_averages_output_doubleSpinBox)
+        self.settings.DS_sweep_first_bias_settle.connect_to_widget(self.ui.first_bias_settle_output_doubleSpinBox)
+        self.settings.DS_sweep_return_sweep.connect_to_widget(self.ui.return_sweep_output_checkBox)
+        self.settings.V_G.connect_to_widget(self.ui.v_g1_doubleSpinBox)
+        self.settings.number_of_output_curves.connect_to_widget(self.ui.num_output_curves_doubleSpinBox)
