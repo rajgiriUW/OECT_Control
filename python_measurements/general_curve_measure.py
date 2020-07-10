@@ -154,7 +154,7 @@ class GeneralCurveMeasure(Measurement):
         self.sweep_source_mode = self.constant_hw.settings['source_mode']
         self.sweep_manual_range = self.constant_hw.settings['manual_range']
         self.sweep_current_compliance = self.constant_hw.settings['current_compliance']
-        self.sweep_nplc = self.constant_hw.settings['NPLC_a']
+        self.sweep_nplc = self.constant_hw.settings['NPLC']
 
         self.v_sweep_start = self.settings['V_%s_start' % self.SWEEP]
         self.v_sweep_finish = self.settings['V_%s_finish' % self.SWEEP]
