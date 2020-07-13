@@ -93,7 +93,6 @@ class GeneralCurveMeasure(Measurement):
 
         self.sweep_hw.settings.autozero.connect_to_widget(self.ui.autozero_sweep_comboBox)
         self.sweep_hw.settings.autorange.connect_to_widget(self.ui.autorange_sweep_checkBox)
-        self.sweep_hw.settings.source_mode.connect_to_widget(self.ui.source_mode_sweep_comboBox)
         self.sweep_hw.settings.manual_range.connect_to_widget(self.ui.manual_range_sweep_comboBox)
         self.sweep_hw.settings.current_compliance.connect_to_widget(self.ui.current_compliance_sweep_doubleSpinBox)
         self.sweep_hw.settings.NPLC.connect_to_widget(self.ui.nplc_sweep_doubleSpinBox)
@@ -151,7 +150,6 @@ class GeneralCurveMeasure(Measurement):
 
         self.sweep_autorange = self.constant_hw.settings['autorange']
         self.sweep_autozero = self.constant_hw.settings['autozero']
-        self.sweep_source_mode = self.constant_hw.settings['source_mode']
         self.sweep_manual_range = self.constant_hw.settings['manual_range']
         self.sweep_current_compliance = self.constant_hw.settings['current_compliance']
         self.sweep_nplc = self.constant_hw.settings['NPLC']
@@ -174,12 +172,18 @@ class GeneralCurveMeasure(Measurement):
 
         self.constant_device = self.constant_hw.keithley
         self.sweep_device = self.sweep_hw.keithley
+
+        #these refer to the same devices as constant and sweep devices, but are convenient when we want to reference
+        #to device by which terminals it corresponds to - makes things easier for measurement and saving
+        self.g_device = self.g_hw.keithley
+        self.ds_device = self.ds_hw.keithley
+        self.g_device.reset()
+        self.ds_device.reset()
         self.read_settings()
 
         #configure keithleys
         self.constant_device.write_current_compliance(self.constant_current_compliance)
         self.sweep_device.write_autozero(self.sweep_autozero)
-        self.sweep_device.write_source_mode(self.sweep_source_mode)
         self.sweep_device.write_current_compliance(self.sweep_current_compliance)
         if not self.sweep_autorange:
             self.sweep_device.measure_current(nplc = self.sweep_nplc, current = self.sweep_manual_range, auto_range = False)
@@ -188,10 +192,7 @@ class GeneralCurveMeasure(Measurement):
             self.sweep_device.measure_current(nplc = self.sweep_nplc)
             self.constant_device.measure_current(nplc = self.sweep_nplc)
 
-        #these refer to the same devices as constant and sweep devices, but are convenient when we want to reference
-        #to device by which terminals it corresponds to - makes things easier for measurement and saving
-        self.g_device = self.g_hw.keithley
-        self.ds_device = self.ds_hw.keithley
+
 
         
         self.num_steps = np.abs(int(np.ceil(((self.v_sweep_finish - self.v_sweep_start)/self.v_sweep_step_size)))) + 1 #add 1 to account for start voltage
@@ -277,6 +278,8 @@ class GeneralCurveMeasure(Measurement):
         '''
         Format and save measurement data.
         '''
+        self.g_device.reset()
+        self.ds_device.reset()
         if self.SWEEP == 'DS':
             append = '_output_curve%g.txt' % self.READ_NUMBER
         else:

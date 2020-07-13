@@ -125,7 +125,6 @@ class AutoMeasure(GeneralCurveMeasure):
 
         self.sweep_autozero = self.sweep_hw.settings['autozero'] = self.ui.autozero_g_comboBox.currentText()
         self.sweep_autorange = self.sweep_hw.settings['autorange'] = self.ui.autorange_g_checkBox.isChecked()
-        self.sweep_source_mode = self.sweep_hw.settings['source_mode'] = self.ui.source_mode_g_comboBox.currentText()
         self.sweep_manual_range = self.sweep_hw.settings['manual_range'] = self.ui.manual_range_g_comboBox.currentText()
         self.sweep_current_compliance = self.sweep_hw.settings['current_compliance'] = self.ui.current_compliance_g_output_doubleSpinBox.value()
         self.sweep_nplc = self.sweep_hw.settings['NPLC'] = self.ui.nplc_g_doubleSpinBox.value()
@@ -146,7 +145,6 @@ class AutoMeasure(GeneralCurveMeasure):
 
         self.sweep_autozero = self.sweep_hw.settings['autozero'] = self.ui.autozero_ds_comboBox.currentText()
         self.sweep_autorange = self.sweep_hw.settings['autorange'] = self.ui.autorange_ds_checkBox.isChecked()
-        self.sweep_source_mode = self.sweep_hw.settings['source_mode'] = self.ui.source_mode_ds_comboBox.currentText()
         self.sweep_manual_range = self.sweep_hw.settings['manual_range'] = self.ui.manual_range_ds_comboBox.currentText()
         self.sweep_current_compliance = self.sweep_hw.settings['current_compliance'] = self.ui.current_compliance_ds_output_doubleSpinBox.value()
         self.sweep_nplc = self.sweep_hw.settings['NPLC'] = self.ui.nplc_ds_doubleSpinBox.value()
