@@ -148,11 +148,11 @@ class GeneralCurveMeasure(Measurement):
         '''
         self.constant_current_compliance = self.constant_hw.settings['current_compliance']
 
-        self.sweep_autorange = self.constant_hw.settings['autorange']
-        self.sweep_autozero = self.constant_hw.settings['autozero']
-        self.sweep_manual_range = self.constant_hw.settings['manual_range']
-        self.sweep_current_compliance = self.constant_hw.settings['current_compliance']
-        self.sweep_nplc = self.constant_hw.settings['NPLC']
+        self.sweep_autorange = self.sweep_hw.settings['autorange']
+        self.sweep_autozero = self.sweep_hw.settings['autozero']
+        self.sweep_manual_range = self.sweep_hw.settings['manual_range']
+        self.sweep_current_compliance = self.sweep_hw.settings['current_compliance']
+        self.sweep_nplc = self.sweep_hw.settings['NPLC']
 
         self.v_sweep_start = self.settings['V_%s_start' % self.SWEEP]
         self.v_sweep_finish = self.settings['V_%s_finish' % self.SWEEP]
@@ -187,10 +187,12 @@ class GeneralCurveMeasure(Measurement):
         self.sweep_device.write_current_compliance(self.sweep_current_compliance)
         if not self.sweep_autorange:
             self.sweep_device.measure_current(nplc = self.sweep_nplc, current = self.sweep_manual_range, auto_range = False)
-            self.constant_device.measure_current(nplc = self.sweep_nplc, current = self.sweep_manual_range, auto_range = False)
+            # self.constant_device.measure_current(nplc = self.sweep_nplc, current = self.sweep_manual_range, auto_range = False)
+            self.constant_device.measure_current()
         else:
             self.sweep_device.measure_current(nplc = self.sweep_nplc)
-            self.constant_device.measure_current(nplc = self.sweep_nplc)
+            # self.constant_device.measure_current(nplc = self.sweep_nplc)
+            self.constant_device.measure_current()
 
 
 

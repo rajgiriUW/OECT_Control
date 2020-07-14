@@ -181,6 +181,9 @@ class Keithley2400SourceMeter(object):
     def write_current_compliance(self, i_compliance):
         self.send(':SENS:CURR:PROT %g' % i_compliance)
 
+    def write_voltage_compliance(self, v_compliance):
+        self.send(':SENS:VOLT:PROT %g' % v_compliance)
+
     def read_is_measuring(self, channel = 'a'):
         resp = self.ask("status:queue?;")[0]
         return bool(float(resp))

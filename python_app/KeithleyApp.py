@@ -28,6 +28,9 @@ class KeithleyApp(BaseMicroscopeApp):
         from python_measurements.auto_measure import AutoMeasure
         self.add_measurement(AutoMeasure(self))
 
+        from python_measurements.new_current_measure import NewCurrentMeasure
+        self.add_measurement(NewCurrentMeasure(self))
+
         
 if __name__ == '__main__':
     import sys
