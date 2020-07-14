@@ -83,7 +83,7 @@
              </widget>
             </item>
             <item row="3" column="2">
-             <widget class="QDoubleSpinBox" name="voltage_compliance_limit_doubleSpinBox"/>
+             <widget class="QDoubleSpinBox" name="voltage_compliance_g_doubleSpinBox"/>
             </item>
             <item row="2" column="0" colspan="2">
              <widget class="QLabel" name="label_2">
@@ -118,40 +118,17 @@
             <string>Keithley 2400 2 (DS)</string>
            </property>
            <layout class="QGridLayout" name="gridLayout">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_4">
+            <item row="1" column="3">
+             <widget class="QLabel" name="label_13">
               <property name="text">
-               <string>Drain Bias (V)</string>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
+               <string>Manual Range</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="1" colspan="2">
-             <widget class="QDoubleSpinBox" name="drain_bias_doubleSpinBox"/>
+            <item row="1" column="5">
+             <widget class="QComboBox" name="manual_range_comboBox"/>
             </item>
-            <item row="1" column="0" colspan="3">
-             <widget class="QCheckBox" name="autorange_checkBox">
-              <property name="text">
-               <string>Autorange</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0" colspan="2">
-             <widget class="QLabel" name="label_6">
-              <property name="text">
-               <string>Current Compliance Limit (A)</string>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="2">
-             <widget class="QDoubleSpinBox" name="current_compliance_ds_doubleSpinBox"/>
-            </item>
-            <item row="2" column="3" colspan="2">
+            <item row="3" column="3" colspan="2">
              <widget class="QLabel" name="label_7">
               <property name="text">
                <string>Measurement Speed (PLC</string>
@@ -164,17 +141,37 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="5">
+            <item row="3" column="5">
              <widget class="QDoubleSpinBox" name="nplc_doubleSpinBox"/>
             </item>
-            <item row="0" column="3">
+            <item row="3" column="0" colspan="2">
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Current Compliance Limit (A)</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="2">
+             <widget class="QDoubleSpinBox" name="current_compliance_ds_doubleSpinBox"/>
+            </item>
+            <item row="1" column="0" colspan="3">
+             <widget class="QCheckBox" name="autorange_checkBox">
+              <property name="text">
+               <string>Autorange</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
              <widget class="QLabel" name="label_5">
               <property name="text">
                <string>Autozero</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="4">
+            <item row="0" column="2">
              <widget class="QComboBox" name="autozero_comboBox">
               <item>
                <property name="text">
@@ -193,16 +190,6 @@
               </item>
              </widget>
             </item>
-            <item row="1" column="4">
-             <widget class="QComboBox" name="manual_range_comboBox"/>
-            </item>
-            <item row="1" column="3">
-             <widget class="QLabel" name="label_13">
-              <property name="text">
-               <string>Manual Range</string>
-              </property>
-             </widget>
-            </item>
            </layout>
           </widget>
          </item>
@@ -215,7 +202,47 @@
          <string>Measurement Settings</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
-         <item row="0" column="0">
+         <item row="2" column="1">
+          <widget class="QDoubleSpinBox" name="first_bias_settle_doubleSpinBox"/>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_15">
+           <property name="text">
+            <string>First Bias Settle (ms)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QDoubleSpinBox" name="drain_bias_doubleSpinBox"/>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="label_12">
+           <property name="text">
+            <string>Setpoint (V)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_14">
+           <property name="text">
+            <string>Delay Gate (s)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QDoubleSpinBox" name="initial_gate_setting_doubleSpinBox"/>
+         </item>
+         <item row="9" column="0">
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>Total Measurement Time (s)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="1">
+          <widget class="QDoubleSpinBox" name="delay_between_averages_doubleSpinBox"/>
+         </item>
+         <item row="3" column="0">
           <widget class="QLabel" name="label_8">
            <property name="text">
             <string>Initial Gate Setting (V)</string>
@@ -225,54 +252,47 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QDoubleSpinBox" name="initial_gate_setting_doubleSpinBox"/>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_9">
-           <property name="text">
-            <string>Time Between Readings (ms)</string>
-           </property>
-           <property name="wordWrap">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QDoubleSpinBox" name="time_between_readings_doubleSpinBox"/>
-         </item>
-         <item row="2" column="0">
+         <item row="8" column="0">
           <widget class="QLabel" name="label_10">
            <property name="text">
-            <string>Approximate Time Step (ms)</string>
+            <string>Delay Between Averages (ms)</string>
            </property>
            <property name="wordWrap">
             <bool>true</bool>
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
-          <widget class="QDoubleSpinBox" name="approx_time_step_doubleSpinBox"/>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string>Total Measurement Time (s)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
+         <item row="9" column="1">
           <widget class="QDoubleSpinBox" name="total_measurement_time_doubleSpinBox"/>
          </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_12">
+         <item row="7" column="1">
+          <widget class="QDoubleSpinBox" name="software_averages_doubleSpinBox"/>
+         </item>
+         <item row="7" column="0">
+          <widget class="QLabel" name="label_9">
            <property name="text">
-            <string>Current Offset (A)</string>
+            <string>Software Averages</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
          <item row="4" column="1">
-          <widget class="QDoubleSpinBox" name="current_offset_doubleSpinBox"/>
+          <widget class="QDoubleSpinBox" name="delay_gate_doubleSpinBox"/>
+         </item>
+         <item row="5" column="1">
+          <widget class="QDoubleSpinBox" name="setpoint_doubleSpinBox"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Drain Bias (V)</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -296,6 +316,26 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>source_mode_comboBox</tabstop>
+  <tabstop>current_compliance_g_doubleSpinBox</tabstop>
+  <tabstop>voltage_compliance_g_doubleSpinBox</tabstop>
+  <tabstop>autozero_comboBox</tabstop>
+  <tabstop>autorange_checkBox</tabstop>
+  <tabstop>manual_range_comboBox</tabstop>
+  <tabstop>current_compliance_ds_doubleSpinBox</tabstop>
+  <tabstop>nplc_doubleSpinBox</tabstop>
+  <tabstop>drain_bias_doubleSpinBox</tabstop>
+  <tabstop>first_bias_settle_doubleSpinBox</tabstop>
+  <tabstop>initial_gate_setting_doubleSpinBox</tabstop>
+  <tabstop>delay_gate_doubleSpinBox</tabstop>
+  <tabstop>setpoint_doubleSpinBox</tabstop>
+  <tabstop>software_averages_doubleSpinBox</tabstop>
+  <tabstop>delay_between_averages_doubleSpinBox</tabstop>
+  <tabstop>total_measurement_time_doubleSpinBox</tabstop>
+  <tabstop>start_pushButton</tabstop>
+  <tabstop>interrupt_pushButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

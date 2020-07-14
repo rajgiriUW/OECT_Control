@@ -26,14 +26,15 @@ class NewCurrentMeasure(Measurement):
         
         #Load ui file and convert it to a live QWidget of the user interface
         self.ui = load_qt_ui_file(self.ui_filename)
+        self.settings.New('drain_bias', unit = 'V', initial = -.6)
+        self.settings.New('first_bias_settle', unit = 'ms', initial = 2000)
         self.settings.New('initial_gate_setting', unit = 'V', initial = 0)
-        # self.settings.New('delay_gate_1', unit = 's', initial = 30)
+        self.settings.New('delay_gate', unit = 's', initial = 30)
+        self.settings.New('setpoint', unit = 'V', initial = .5)
         # self.settings.New('delay_gate_2', unit = 's', initial = 60)
-        self.settings.New('time_between_readings', unit = 'ms', initial = 30)
-        self.settings.New('approx_time_step', unit = 'ms', initial = 300)
+        self.settings.New('software_averages', int, initial = 10)
+        self.settings.New('delay_between_averages', unit = 'ms', initial = 300)
         self.settings.New('total_measurement_time', unit = 's', initial = 120)
-        self.settings.New('current_offset', unit = 'A', initial = 0)
-        self.settings.New('software_averages', int, initial = 0)
 
         self.g_hw = self.app.hardware['keithley2400_sourcemeter1']
         self.ds_hw = self.app.hardware['keithley2400_sourcemeter2']
@@ -45,18 +46,21 @@ class NewCurrentMeasure(Measurement):
         build plots, etc.
         """
         self.g_hw.settings.current_compliance.connect_to_widget(self.ui.current_compliance_g_doubleSpinBox)
-        self.ds_hw.settings.drain_bias.connect_to_widget(self.ui.drain_bias_doubleSpinBox)
+        self.g_hw.settings.voltage_compliance.connect_to_widget(self.ui.voltage_compliance_g_doubleSpinBox)
         self.ds_hw.settings.autorange.connect_to_widget(self.ui.autorange_checkBox)
         self.ds_hw.settings.autozero.connect_to_widget(self.ui.autozero_comboBox)
         self.ds_hw.settings.manual_range.connect_to_widget(self.ui.manual_range_comboBox)
         self.ds_hw.settings.current_compliance.connect_to_widget(self.ui.current_compliance_ds_doubleSpinBox)
         self.ds_hw.settings.NPLC.connect_to_widget(self.ui.nplc_doubleSpinBox)
 
+        self.settings.drain_bias.connect_to_widget(self.ui.drain_bias_doubleSpinBox)
+        self.settings.first_bias_settle.connect_to_widget(self.ui.first_bias_settle_doubleSpinBox)
         self.settings.initial_gate_setting.connect_to_widget(self.ui.initial_gate_setting_doubleSpinBox)
-        self.settings.time_between_readings.connect_to_widget(self.ui.time_between_readings_doubleSpinBox)
-        self.settings.approx_time_step.connect_to_widget(self.ui.approx_time_step_doubleSpinBox)
+        self.settings.delay_gate.connect_to_widget(self.ui.delay_gate_doubleSpinBox)
+        self.settings.setpoint.connect_to_widget(self.ui.setpoint_doubleSpinBox)
+        self.settings.software_averages.connect_to_widget(self.ui.software_averages_doubleSpinBox)
+        self.settings.delay_between_averages.connect_to_widget(self.ui.delay_between_averages_doubleSpinBox)
         self.settings.total_measurement_time.connect_to_widget(self.ui.total_measurement_time_doubleSpinBox)
-        self.settings.current_offset.connect_to_widget(self.ui.current_offset_doubleSpinBox)
         
         # connect ui widgets to measurement/hardware settings or functions
         self.ui.start_pushButton.clicked.connect(self.start)
@@ -70,36 +74,29 @@ class NewCurrentMeasure(Measurement):
         self.plot = self.graph_layout.addPlot(title="Current vs. Time")
         self.plot.setLabel('bottom', 'Time (ms)')
         self.plot.setLabel('left', 'I_DS')
-
-
         
-    # def update_display(self):
-    #     if hasattr(self, 'ds_reading') and hasattr(self, 'g_reading'):
-    #         if self.doing_return_sweep: #plot only return sweep data
-    #             self.g_plot.plot(self.voltages[self.num_steps:], self.save_array[self.num_steps:, 1], pen = 'r', clear = True)
-    #             self.ds_plot.plot(self.voltages[self.num_steps:], self.save_array[self.num_steps:, 3], pen = 'b', clear = True)
-
+    def update_display(self):
+            self.plot.plot(self.time_array, self.save_array[:,2], pen = 'r', clear = True)
 
     def read_settings(self):
         self.g_source_mode = self.g_hw.settings['source_mode']
         self.g_current_compliance = self.g_hw.settings['current_compliance']
         self.g_voltage_compliance = self.g_hw.settings['voltage_compliance']
 
-        self.ds_drain_bias = self.ds_hw.settings['drain_bias']
         self.ds_autorange = self.ds_hw.settings['autorange']
         self.ds_autozero = self.ds_hw.settings['autozero']
         self.ds_manual_range = self.ds_hw.settings['manual_range']
         self.ds_current_compliance = self.ds_hw.settings['current_compliance']
         self.ds_nplc = self.ds_hw.settings['NPLC']
 
+        self.drain_bias = self.settings['drain_bias']
+        self.first_bias_settle = self.settings['first_bias_settle']
         self.initial_gate_setting = self.settings['initial_gate_setting']
-        # self.delay_gate1 = self.settings['delay_gate_1']
-        # self.delay_gate2 = self.settings['delay_gate_2']
-        self.time_between_readings = self.settings['time_between_readings']
-        self.approx_time_step = self.settings['approx_time_step']
+        self.delay_gate = self.settings['delay_gate']
+        self.setpoint = self.settings['setpoint']
+        self.software_averages = self.settings['software_averages']
+        self.delay_between_averages = self.settings['delay_between_averages']
         self.total_measurement_time = self.settings['total_measurement_time']
-        self.current_offset = self.settings['current_offset']
-        # self.software_averages = self.settings['software_averages']
     
     def pre_run(self):
         self.check_filename(".txt")
@@ -123,26 +120,25 @@ class NewCurrentMeasure(Measurement):
         self.ds_device.write_current_compliance(self.ds_current_compliance)
         if not self.ds_autorange:
             self.ds_device.measure_current(nplc = self.ds_nplc, current = self.ds_manual_range, auto_range = False)
-            self.g_device.measure_current()
         else:
-            self.ds_device.measure_current(nplc = self.sweep_nplc)
-            self.g_device.measure_current()
+            self.ds_device.measure_current(nplc = self.ds_nplc)
+
+        self.time_for_avg = self.software_averages * self.delay_between_averages
+        self.time_array = np.arange(start = 0, stop = self.total_measurement_time * 1000 + self.time_for_avg, step = self.time_for_avg)
+        self.num_initial = int((self.delay_gate * 1000)/self.time_for_avg)
+        self.num_setpoint = int(((self.total_measurement_time - self.delay_gate) * 1000)/self.time_for_avg)
 
 
-        self.num_measure = int(np.ceil(self.approx_time_step/self.time_between_readings))
-        self.time_array = np.arange(start = 0, stop = self.approx_time_step *3, step = self.time_between_readings) #hardcoded
-        self.save_array = np.zeros(shape=(self.time_array.shape[0], 3))
+        self.save_array = np.zeros(shape=(self.time_array.shape[0], 4))
         self.save_array[:,0] = self.time_array
+        self.save_array[:self.num_initial, 1] = self.initial_gate_setting
+        self.save_array[self.num_initial:, 1] = self.setpoint
         #prepare hardware for read
         self.g_device.write_output_on()
         self.ds_device.write_output_on()
 
-        self.ds_device.source_V(self.ds_drain_bias)
-        self.v_g_array = [self.initial_gate_setting, 0, 0] #hardcoded
+        self.ds_device.source_V(self.drain_bias)
         time.sleep(self.first_bias_settle * .001)
-        self.point_counter = 0
-
-
 
     def run(self):
         """
@@ -152,42 +148,26 @@ class NewCurrentMeasure(Measurement):
 
         Runs until measurement is interrupted. Data is continuously saved if checkbox checked.
         """
-        for v_g in self.v_g_array:
-            self.do_v_sweep(v_g)
-        
-
-
-    def do_sweep(self, v_g):
-        '''
-        Perform sweep.
-        '''
-        for i in self.num_measure:
-            self.g_device.source_V(v_g)
-            ds_current = self.read_currents()
-            save_row = self.point_counter
-            self.save_array[save_row, 1] = v_g
-            self.save_array[save_row, 2] = self.ds_current
-            self.point_counter += 1
-            if self.interrupt_measurement_called:
-                break
-
+        for i in range(self.num_initial):
+            ds_reading = self.read_currents()
+            self.save_array[i, 2] = ds_reading[0]
+            self.save_array[i, 3] = ds_reading[1]
+        for i in range(self.num_setpoint + 1):
+            ds_reading = self.read_currents()
+            self.save_array[i + self.num_initial, 2] = ds_reading[0]
+            self.save_array[i + self.num_initial, 3] = ds_reading[1]
 
     def read_currents(self):
         '''
         Read both sourcemeters, taking software averages.
         '''
-        # g_current_read = np.zeros(int(self.software_averages))
-        # ds_current_read = np.zeros(int(self.software_averages))
-        # for i in range(int(self.software_averages)):
-        #     g_current_read[i] = self.g_device.read_I()
-        #     ds_current_read[i] = self.ds_device.read_I()
-        #     time.sleep(self.delay_between_averages * .001)
-        # g_current_avg = np.mean(g_current_read)
-        # ds_current_avg = np.mean(ds_current_read)
-        # g_std = np.std(g_current_read, ddof = 1) #ddof - delta degrees of freedom. set to 1 for sample std
-        # ds_std = np.std(ds_current_read, ddof = 1)
-        # return [g_current_avg, g_std, ds_current_avg, ds_std]
-        return self.ds_device.read_I()
+        ds_current_read = np.zeros(int(self.software_averages))
+        for i in range(int(self.software_averages)):
+            ds_current_read[i] = self.ds_device.read_I()
+            time.sleep(self.delay_between_averages * .001)
+        ds_current_avg = np.mean(ds_current_read)
+        ds_std = np.std(ds_current_read, ddof = 1)
+        return [ds_current_avg, ds_std]
 
     def post_run(self):
         '''
@@ -195,21 +175,12 @@ class NewCurrentMeasure(Measurement):
         '''
         self.g_device.reset()
         self.ds_device.reset()
-
-        self.check_filename('new_current_vs_time.txt')
+        append = '_new_current_vs_time.txt'
+        self.check_filename(append)
         
-        v_ds_info = 'V_DS =\t%g' % self.ds_drain_bias
-        v_g_info = 'V_G = ' + str(self.v_g_array) 
-        # avgs_info = 'Number of Averages =\t%g' % self.software_averages
-        # width_info = 'Width/um=\t%g' % self.dimension_choice[self.dimension][0]
-        # length_info = 'Length/um=\t%g' % self.dimension_choice[self.dimension][1]
-        # thickness_info = 'Thickness/nm=\t%g' % self.thickness
-        # info_footer = v_constant_info + "\n" + avgs_info + "\n" + width_info + "\n" + length_info + "\n" + thickness_info
-        # info_header = 'V_%s\tI_G (A)\tI_G Error (A)\tI_DS (A)\tI_DS Error (A)' % (self.CONSTANT)
-        info_footer = v_ds_info + '\n' + v_g_info
-        info_header = 'Time (ms) \tV_G (V)\tI_DS(A)'
-        # np.savetxt(self.app.settings['save_dir']+"/"+ self.app.settings['sample'] + append, self.save_array, fmt = '%.10f', 
-            # header = info_header, footer = info_footer)
+        v_ds_info = 'V_DS =\t%g' % self.drain_bias
+        info_footer = v_ds_info
+        info_header = 'Time (ms)\tV_G (V)\tI_DS(A)\tI_DS error (A)'
         np.savetxt(self.app.settings['save_dir'] + "/" + self.app.settings['sample'] + append, self.save_array, fmt = '%.10f',
             header = info_header, footer = info_footer)
 

@@ -21,7 +21,6 @@ class Keithley2400SourceMeterComponent(HardwareComponent): #object-->HardwareCom
     AUTORANGE_DEFAULT = True
     CURRENT_COMPLIANCE_DEFAULT = .1
     VOLTAGE_COMPLIANCE_DEFAULT = -.95
-    DRAIN_BIAS_DEFAULT = -.6
     NPLC_DEFAULT = 1
 
     def setup(self):
@@ -42,7 +41,6 @@ class Keithley2400SourceMeterComponent(HardwareComponent): #object-->HardwareCom
         self.manual_range = self.settings.New('manual_range', str, choices = self.i_ranges.keys(), initial = self.MANUAL_RANGE_DEFAULT)
         self.current_compliance = self.settings.New('current_compliance', unit='A', initial = self.CURRENT_COMPLIANCE_DEFAULT)
         self.voltage_compliance = self.settings.New('voltage_compliance', unit='V', initial = self.VOLTAGE_COMPLIANCE_DEFAULT)
-        self.drain_bias = self.settings.New('drain_bias', unit = 'V', initial = self.DRAIN_BIAS_DEFAULT)
         self.NPLC = self.settings.New('NPLC', initial = self.NPLC_DEFAULT)
         
     def connect(self):
