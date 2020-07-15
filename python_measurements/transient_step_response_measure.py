@@ -7,7 +7,7 @@ import numpy as np
 import time
 import os.path
 
-class NewCurrentMeasure(Measurement):
+class TransientStepResponseMeasure(Measurement):
    
     def setup(self):
         """
@@ -20,7 +20,7 @@ class NewCurrentMeasure(Measurement):
         # This file can be edited graphically with Qt Creator
         # sibling_path function allows python to find a file in the same folder
         # as this python module
-        self.name = "new_current_vs_time_measure"
+        self.name = "TransientStepResponse"
 
         self.ui_filename = sibling_path(__file__, "new_current_vs_time.ui")
         

@@ -25,11 +25,11 @@ class KeithleyApp(BaseMicroscopeApp):
         self.add_measurement(OutputCurveMeasure(self))
         from python_measurements.transfer_curve_measure import TransferCurveMeasure
         self.add_measurement(TransferCurveMeasure(self))
-        from python_measurements.auto_measure import AutoMeasure
-        self.add_measurement(AutoMeasure(self))
 
-        from python_measurements.new_current_measure import NewCurrentMeasure
-        self.add_measurement(NewCurrentMeasure(self))
+        from python_measurements.test_device_measure import TestDeviceMeasure
+        self.add_measurement(TestDeviceMeasure(self))
+        from python_measurements.transient_step_response_measure import TransientStepResponseMeasure
+        self.add_measurement(TransientStepResponseMeasure(self))
 
         
 if __name__ == '__main__':

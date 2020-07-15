@@ -6,8 +6,6 @@
 from __future__ import division
 import numpy as np
 import time
-import matplotlib.pyplot as plt
-import serial
 import pyvisa as pv
 
 
