@@ -1,0 +1,10 @@
+Metadata-Version: 2.1
+Briefcase-Version: 0.3.2
+Name: oectapp
+Formal-Name: OECT App
+App-ID: com.example.oectapp
+Version: 0.0.1
+Home-page: https://example.com/oectapp
+Author: Sarthak Jariwal
+Author-email: sarthak@example.com
+Summary: OECT app with beeware

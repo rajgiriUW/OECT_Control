@@ -1,0 +1,43 @@
+[tool.briefcase]
+project_name = "OECT App"
+bundle = "com.example"
+version = "0.0.1"
+url = "https://example.com/oectapp"
+license = "MIT license"
+author = 'Sarthak Jariwal'
+author_email = "sarthak@example.com"
+
+[tool.briefcase.app.oectapp]
+formal_name = "OECT App"
+description = "OECT app with beeware"
+icon = "src/oectapp/resources/oectapp"
+sources = ['src/oectapp']
+requires = [
+    'pyqt5',
+    'scopefoundry',
+    'qtpy',
+    'pyqtgraph',
+    'numpy',
+    'h5py',
+    'ipython',
+    'qtconsole',
+    'pyvisa'
+    ]
+
+
+[tool.briefcase.app.oectapp.macOS]
+requires = []
+
+[tool.briefcase.app.oectapp.linux]
+requires = []
+system_requires = []
+
+[tool.briefcase.app.oectapp.windows]
+requires = []
+
+# Mobile deployments
+[tool.briefcase.app.oectapp.iOS]
+requires = []
+
+[tool.briefcase.app.oectapp.android]
+requires = []
