@@ -80,13 +80,15 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         
     def update_display(self):
         '''
-        No graphics to update for automeasure
+        No graphics to update for automeasure.
+        Keep this to override GeneralCurveMeasure's function
         '''
         pass
 
     def pre_run(self):
         '''
         pre_run for each measurement is handled in run()
+        Keep this to override GeneralCurveMeasure's function
         '''
         pass
         

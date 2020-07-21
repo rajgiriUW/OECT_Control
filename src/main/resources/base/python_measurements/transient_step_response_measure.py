@@ -7,12 +7,6 @@ import numpy as np
 import time
 import os.path
 
-# class MainWindow(QtWidgets.QMainWindow):
-#     def __init__(self):
-#         super(MainWindow, self).__init__()
-#         self.ui = Ui_Dialog()
-#         self.ui.setupUi(self)
-
 class TransientStepResponseMeasure(Measurement):
 
     def setup(self):
@@ -27,20 +21,16 @@ class TransientStepResponseMeasure(Measurement):
         # sibling_path function allows python to find a file in the same folder
         # as this python module
         self.name = "TransientStepResponse"
-
-
         
         #Load ui file and convert it to a live QWidget of the user interface
         self.ui_filename = sibling_path(__file__, "transient_step_response.ui")
         self.ui = load_qt_ui_file(self.ui_filename)
-
 
         self.settings.New('drain_bias', unit = 'V', initial = -.6)
         self.settings.New('first_bias_settle', unit = 'ms', initial = 2000)
         self.settings.New('initial_gate_setting', unit = 'V', initial = 0)
         self.settings.New('delay_gate', unit = 's', initial = 30)
         self.settings.New('setpoint', unit = 'V', initial = .5)
-        # self.settings.New('delay_gate_2', unit = 's', initial = 60)
         self.settings.New('software_averages', int, initial = 10)
         self.settings.New('delay_between_averages', unit = 'ms', initial = 300)
         self.settings.New('total_measurement_time', unit = 's', initial = 120)
@@ -88,6 +78,9 @@ class TransientStepResponseMeasure(Measurement):
             self.plot.plot(self.time_array, self.save_array[:,2], pen = 'r', clear = True)
 
     def read_settings(self):
+        '''
+        Grab values of settings before run.
+        '''
         self.g_source_mode = self.g_hw.settings['source_mode']
         self.g_current_compliance = self.g_hw.settings['current_compliance']
         self.g_voltage_compliance = self.g_hw.settings['voltage_compliance']
@@ -108,8 +101,7 @@ class TransientStepResponseMeasure(Measurement):
         self.total_measurement_time = self.settings['total_measurement_time']
     
     def pre_run(self):
-        self.check_filename(".txt")
-
+        self.check_filename(".txt") #check that valid filename has been set
 
         #these refer to the same devices as constant and sweep devices, but are convenient when we want to reference
         #to device by which terminals it corresponds to - makes things easier for measurement and saving
@@ -137,11 +129,11 @@ class TransientStepResponseMeasure(Measurement):
         self.num_initial = int((self.delay_gate * 1000)/self.time_for_avg)
         self.num_setpoint = int(((self.total_measurement_time - self.delay_gate) * 1000)/self.time_for_avg)
 
-
         self.save_array = np.zeros(shape=(self.time_array.shape[0], 4))
         self.save_array[:,0] = self.time_array
         self.save_array[:self.num_initial, 1] = self.initial_gate_setting
         self.save_array[self.num_initial:, 1] = self.setpoint
+
         #prepare hardware for read
         self.g_device.write_output_on()
         self.ds_device.write_output_on()
