@@ -1,0 +1,10 @@
+{
+    "app_name": "OECT Control",
+    "author": "Gingerlab",
+    "main_module": "src/main/python/KeithleyApp.py",
+    "version": "0.0.0",
+    "gpg_key": "CE0B70DC27199347E7ED4983FC2E266F1615BF9E",
+    "gpg_name": "Linda Taing",
+    "hidden_imports": ["ipykernel.datapub", "ipython", "qtconsole", "pyvisa"]
+
+}

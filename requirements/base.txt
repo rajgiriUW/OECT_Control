@@ -1,0 +1,11 @@
+fbs==0.8.8
+scopefoundry
+numpy
+pyqt5
+qtpy
+h5py
+pyqtgraph
+ipython
+qtconsole
+pyvisa
+ipykernel
