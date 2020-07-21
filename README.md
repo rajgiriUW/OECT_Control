@@ -51,10 +51,10 @@ fbs run
 
 ### Notes about making changes to the application
 - The build.json file, located in src/build/settings, is crucial for getting the FBS application to compile and build correctly.
- -  ```"hidden_imports": ["ipykernel.datapub", "ipython", "qtconsole", "pyvisa"]``` MUST be added to build.json file to ensure it is properly packaged.
- - The main application file is usually located in the src/main/python directory. However, if you need the file in another directory, you may specify it in the build.json file's "main_module" property.
+  -  ```"hidden_imports": ["ipykernel.datapub", "ipython", "qtconsole", "pyvisa"]``` MUST be present in the build.json file to ensure it is properly packaged.
+  - The main application file is usually located in the src/main/python directory. However, if you need the file in another directory, you may specify it in the build.json file's "main_module" property.
 - The rest of the modules and files needed to run the main app MUST be in the src/main/resources/base directory.
- - The ScopeFoundry folder in this directory is needed for FBS to pull the base app UI file.
+  - The ScopeFoundry folder in this directory is needed for FBS to pull the base app UI file.
 
 ### Packaging the application
 ```
