@@ -68,6 +68,23 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.settings.dimension.connect_to_widget(self.ui.dimension_comboBox)
         self.settings.thickness.connect_to_widget(self.ui.thickness_doubleSpinBox)
 
+        # # Set up pyqtgraph graph_layout in the UI
+        self.graph_layout = pg.GraphicsLayoutWidget(title = 'Test Device graphs', show = True)
+        # self.graph_layout.window().hide()
+
+
+        # # # Create PlotItem object (a set of axes)
+        self.g_plot = self.graph_layout.addPlot(title = 'Keithley 2400 1')
+
+        self.g_plot.setLabel('left', 'I_G')
+
+        self.ds_plot = self.graph_layout.addPlot(title='Keithley 2400 2')
+
+        self.ds_plot.setLabel('left', 'I_DS')
+
+        self.graph_layout.window().setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        
+
     def on_output_curves_changed(self):
         '''
         Enable/disable correct number of V_G spinboxes depending on how many output curves specified.
@@ -79,22 +96,25 @@ class TestDeviceMeasure(GeneralCurveMeasure):
             self.v_g_spinboxes[i].setEnabled(False)
         
     def update_display(self):
-        '''
-        No graphics to update for automeasure.
-        Keep this to override GeneralCurveMeasure's function
-        '''
-        pass
+        GeneralCurveMeasure.update_display(self)
+        if (self.switched):
+            self.g_plot.setLabel('bottom', 'V_DS')
+            self.ds_plot.setLabel('bottom', 'V_DS')
+            self.switched = False #to make sure this only happens once
 
     def pre_run(self):
         '''
-        pre_run for each measurement is handled in run()
-        Keep this to override GeneralCurveMeasure's function
+        Other pre_run steps are taken care of in run(), since Transfer and Output
+        have their own procedures.
         '''
-        pass
-        
-    def run(self):
+        self.graph_layout.show()
+        self.switched = False
         self.dimension = self.settings['dimension'] = self.ui.dimension_comboBox.currentText()
         self.thickness = self.settings['thickness'] = self.ui.thickness_doubleSpinBox.value()
+        self.ds_plot.setLabel('bottom', 'V_G')
+        self.g_plot.setLabel('bottom', 'V_G')
+        
+    def run(self):
         self.read_settings = self.transfer_read_from_settings
         GeneralCurveMeasure.pre_run(self)
         for i in range(self.num_transfer_curves):
@@ -103,6 +123,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
             self.sweep_device.source_V(self.v_sweep_start) #reset to sweep start voltage before running another curve
             self.READ_NUMBER += 1
         self.switch_setting() #configure variables for output curve
+        self.switched = True
         self.READ_NUMBER = 1 #reset file numbering for output curves
 
         self.read_settings = self.output_read_from_settings
