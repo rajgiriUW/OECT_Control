@@ -10,7 +10,7 @@ import sys
 
 class KeithleyApp(BaseMicroscopeApp):
     
-    name = "keithley_app"
+    name = "OECT_Control"
     
     def setup(self):
         from src.main.resources.base.keithley_sourcemeter.keithley2400_sourcemeter_hc import Keithley2400SourceMeterComponent

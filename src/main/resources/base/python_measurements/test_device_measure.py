@@ -129,6 +129,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.read_settings = self.output_read_from_settings
         GeneralCurveMeasure.pre_run(self)
         for v_g_value in self.output_v_g_values:
+            self.ui.v_g_doubleSpinBox.setValue(v_g_value)
             self.v_constant = self.settings['V_G'] = v_g_value
             self.constant_device.source_V(self.v_constant)
             GeneralCurveMeasure.run(self)
