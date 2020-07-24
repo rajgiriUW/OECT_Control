@@ -66,3 +66,11 @@ You can create an installer for the app with
 ```
 fbs installer
 ```
+
+## Screenshots
+### Transfer Curve
+![Transfer Curve UI](https://github.com/rajgiriUW/OECT_Control/blob/master/Screenshots/transfer_curve.jpg)
+### Test Device
+![Test Device UI](https://github.com/rajgiriUW/OECT_Control/blob/master/Screenshots/test_device.jpg)
+### Transient Step Response
+![Transient Step Response UI](https://github.com/rajgiriUW/OECT_Control/blob/master/Screenshots/transient_step.jpg)
