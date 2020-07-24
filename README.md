@@ -39,10 +39,10 @@ pip install fbs PyQt5==5.9.2
 
 1. Install OECT dependencies with
 ```
-pip install numpy qtpy h5py pyqtgraph scopefoundry pyvisa qtconsole ipython
+pip install -r requirements/base.txt
 ```
 
-2. Navigate to the directory containing the "src" and "requirements" folders for the app.
+2. Navigate to the directory containing the "src" folder for the app.
 
 3. To test the app, run
 ```
