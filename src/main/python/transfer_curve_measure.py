@@ -7,9 +7,9 @@ import numpy as np
 import time
 import os.path
 
-from .general_curve_measure import GeneralCurveMeasure
+from general_curve_measure import GeneralCurveMeasure
 
-class OutputCurveMeasure(GeneralCurveMeasure):
+class TransferCurveMeasure(GeneralCurveMeasure):
     #these variables are needed so this program runs GeneralCurveMeasure with the proper device references
-    SWEEP = "DS"
-    CONSTANT = "G"
+    SWEEP = "G"
+    CONSTANT = "DS"

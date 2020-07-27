@@ -7,9 +7,9 @@ import numpy as np
 import time
 import os.path
 
-from .general_curve_measure import GeneralCurveMeasure
-from .output_curve_measure import OutputCurveMeasure
-from .transfer_curve_measure import TransferCurveMeasure
+from general_curve_measure import GeneralCurveMeasure
+from output_curve_measure import OutputCurveMeasure
+from transfer_curve_measure import TransferCurveMeasure
 
 class TestDeviceMeasure(GeneralCurveMeasure):
     #class variables determining vhich device's voltage will go through a sweep and which will be constant
@@ -36,7 +36,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
 
     def setup(self):
         self.name = "TestDevice"
-        self.ui_filename = sibling_path(__file__, "test_device.ui")
+        self.ui_filename = self.app.appctxt.get_resource("test_device.ui")
         
         #Load ui file and convert it to a live QWidget of the user interface
         self.ui = load_qt_ui_file(self.ui_filename)
@@ -70,21 +70,16 @@ class TestDeviceMeasure(GeneralCurveMeasure):
 
         # # Set up pyqtgraph graph_layout in the UI
         self.graph_layout = pg.GraphicsLayoutWidget(title = 'Test Device graphs', show = True)
-        # self.graph_layout.window().hide()
-
 
         # # # Create PlotItem object (a set of axes)
         self.g_plot = self.graph_layout.addPlot(title = 'Keithley 2400 1')
-
         self.g_plot.setLabel('left', 'I_G')
 
         self.ds_plot = self.graph_layout.addPlot(title='Keithley 2400 2')
-
         self.ds_plot.setLabel('left', 'I_DS')
 
         self.graph_layout.window().setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
         
-
     def on_output_curves_changed(self):
         '''
         Enable/disable correct number of V_G spinboxes depending on how many output curves specified.

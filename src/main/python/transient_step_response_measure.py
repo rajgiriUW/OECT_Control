@@ -23,7 +23,7 @@ class TransientStepResponseMeasure(Measurement):
         self.name = "TransientStepResponse"
         
         #Load ui file and convert it to a live QWidget of the user interface
-        self.ui_filename = sibling_path(__file__, "transient_step_response.ui")
+        self.ui_filename = self.app.appctxt.get_resource("transient_step_response.ui")
         self.ui = load_qt_ui_file(self.ui_filename)
 
         self.settings.New('drain_bias', unit = 'V', initial = -.6)

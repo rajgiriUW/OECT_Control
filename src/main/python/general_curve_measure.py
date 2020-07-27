@@ -27,9 +27,10 @@ class GeneralCurveMeasure(Measurement):
         # This file can be edited graphically with Qt Creator
         # sibling_path function allows python to find a file in the same folder
         # as this python module
-        if "SWEEP" == "DS": self.name = "output_curve_measure"
-        elif "SWEEP" == "G": self.name = "transfer_curve_measure"
-        self.ui_filename = sibling_path(__file__, "general_curve.ui")
+        if self.SWEEP == "DS": self.name = "output_curve_measure"
+        elif self.SWEEP == "G": self.name = "transfer_curve_measure"
+        # self.ui_filename = sibling_path(__file__, "general_curve.ui")
+        self.ui_filename = self.app.appctxt.get_resource("general_curve.ui")
         
         #Load ui file and convert it to a live QWidget of the user interface
         self.ui = load_qt_ui_file(self.ui_filename)

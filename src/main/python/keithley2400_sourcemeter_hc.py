@@ -5,7 +5,7 @@ July 2 2020
 from ScopeFoundry import HardwareComponent
 
 try:
-    from .keithley2400_sourcemeter_interface import Keithley2400SourceMeter
+    from keithley2400_sourcemeter_interface import Keithley2400SourceMeter
 except Exception as err:
     print("Cannot load required modules for Keithley SourceMeter:", err)
 
