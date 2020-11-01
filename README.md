@@ -23,7 +23,7 @@ Refer to https://build-system.fman.io/manual/ for more info.
 ### Setting up FBS and its dependencies in a new environment
 1. Create a new virtual environment and activate it by running the following commands, replacing "envname" with what you want to name the new environment.
 ```
-conda create -n envname python=3.6 anaconda
+conda create -n envname python=3.6
 conda activate envname
 ```
 The specified Python version should be 3.5 or 3.6. Newer versions of Python are not yet supported by FBS.
