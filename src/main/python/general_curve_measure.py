@@ -47,7 +47,7 @@ class GeneralCurveMeasure(Measurement):
         # All settings are automatically added to   the Microscope user interface
 
         self.settings.New('V_%s_start' % self.SWEEP, unit = 'V', si = True, initial = -0.7)
-        self.settings.New('V_%s_finish' % self.SWEEP, unit = 'V', si = True, initial = 3)
+        self.settings.New('V_%s_finish' % self.SWEEP, unit = 'V', si = True, initial = 0.3)
         self.settings.New('V_%s_step_size' % self.SWEEP, unit = 'V', si = True, initial = 0.1)
         self.settings.New('%s_sweep_preread_delay' % self.SWEEP, unit = 'ms', si = True, initial = 5000)
         self.settings.New('%s_sweep_delay_between_averages' % self.SWEEP, unit = 'ms', si = True, initial = 200)
@@ -230,8 +230,9 @@ class GeneralCurveMeasure(Measurement):
         self.do_sweep()
         if self.return_sweep: #perform return sweep
             self.doing_return_sweep = True
-            self.v_sweep_step_size *= -1
-            self.do_sweep()
+            #self.v_sweep_step_size *= -1
+            #self.do_sweep()
+            #self.v_sweep_step_size *= -1
 
 
     def do_sweep(self):
@@ -241,9 +242,13 @@ class GeneralCurveMeasure(Measurement):
         num_steps = self.num_steps
         if self.doing_return_sweep: 
             num_steps -= 1
-        for i in range(num_steps):
-            self.source_voltage += self.v_sweep_step_size
-            self.sweep_device.source_V(self.source_voltage)
+        #for i in range(num_steps):
+
+        for i, v in enumerate(self.voltages):
+            #print(i, v)
+            #self.source_voltage += self.v_sweep_step_size
+            #self.sweep_device.source_V(self.source_voltage)
+            self.sweep_device.source_V(v)
             time.sleep(self.preread_delay * .001)
             current_readings = self.read_currents()
             self.g_reading = current_readings[0]
@@ -251,8 +256,8 @@ class GeneralCurveMeasure(Measurement):
             self.ds_reading = current_readings[2]
             ds_std = current_readings[3]
             save_row = i
-            if self.doing_return_sweep: 
-                save_row += self.num_steps #to ensure the right row is overwritten in return sweep 
+            #if self.doing_return_sweep: 
+            #    save_row += self.num_steps #to ensure the right row is overwritten in return sweep 
             self.save_array[save_row, 1] = self.g_reading
             self.save_array[save_row, 2] = g_std
             self.save_array[save_row, 3] = self.ds_reading
@@ -260,6 +265,7 @@ class GeneralCurveMeasure(Measurement):
             if self.interrupt_measurement_called:
                 break
 
+            
 
     def read_currents(self):
         '''

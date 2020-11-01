@@ -130,6 +130,8 @@ class TestDeviceMeasure(GeneralCurveMeasure):
             GeneralCurveMeasure.run(self)
             GeneralCurveMeasure.post_run(self)
             self.sweep_device.source_V(self.v_sweep_start)
+            time.sleep(self.preread_delay * .001)
+            self.source_voltage = self.v_sweep_start - self.v_sweep_step_size
             self.READ_NUMBER += 1
         self.READ_NUMBER = 1 #reset file numbering
         self.switch_setting() #configure variables for transfer curve again
