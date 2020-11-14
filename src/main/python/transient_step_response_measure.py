@@ -29,11 +29,12 @@ class TransientStepResponseMeasure(Measurement):
         self.settings.New('drain_bias', unit = 'V', initial = -.6)
         self.settings.New('first_bias_settle', unit = 'ms', initial = 2000)
         self.settings.New('initial_gate_setting', unit = 'V', initial = 0)
-        self.settings.New('delay_gate', unit = 's', initial = 30)
+        self.settings.New('delay_gate', unit = 's', initial = 10)
         self.settings.New('setpoint', unit = 'V', initial = .5)
-        self.settings.New('software_averages', int, initial = 10)
-        self.settings.New('delay_between_averages', unit = 'ms', initial = 300)
-        self.settings.New('total_measurement_time', unit = 's', initial = 120)
+        self.settings.New('gate_time', unit = 's', initial = 10)
+        self.settings.New('software_averages', int, initial = 1)
+        self.settings.New('delay_between_averages', unit = 'ms', initial = 100)
+        self.settings.New('total_measurement_time', unit = 's', initial = 30)
 
         self.g_hw = self.app.hardware['keithley2400_sourcemeter1']
         self.ds_hw = self.app.hardware['keithley2400_sourcemeter2']
@@ -57,6 +58,7 @@ class TransientStepResponseMeasure(Measurement):
         self.settings.initial_gate_setting.connect_to_widget(self.ui.initial_gate_setting_doubleSpinBox)
         self.settings.delay_gate.connect_to_widget(self.ui.delay_gate_doubleSpinBox)
         self.settings.setpoint.connect_to_widget(self.ui.setpoint_doubleSpinBox)
+        self.settings.gate_time.connect_to_widget(self.ui.gate_time_doubleSpinBox)
         self.settings.software_averages.connect_to_widget(self.ui.software_averages_doubleSpinBox)
         self.settings.delay_between_averages.connect_to_widget(self.ui.delay_between_averages_doubleSpinBox)
         self.settings.total_measurement_time.connect_to_widget(self.ui.total_measurement_time_doubleSpinBox)
@@ -95,6 +97,7 @@ class TransientStepResponseMeasure(Measurement):
         self.first_bias_settle = self.settings['first_bias_settle']
         self.initial_gate_setting = self.settings['initial_gate_setting']
         self.delay_gate = self.settings['delay_gate']
+        self.gate_time = self.settings['gate_time']
         self.setpoint = self.settings['setpoint']
         self.software_averages = self.settings['software_averages']
         self.delay_between_averages = self.settings['delay_between_averages']
@@ -137,8 +140,10 @@ class TransientStepResponseMeasure(Measurement):
         #prepare hardware for read
         self.g_device.write_output_on()
         self.ds_device.write_output_on()
-
+        
+        self.g_device.source_V(self.initial_gate_setting)
         self.ds_device.source_V(self.drain_bias)
+        
         time.sleep(self.first_bias_settle * .001)
 
     def run(self):
@@ -149,15 +154,44 @@ class TransientStepResponseMeasure(Measurement):
 
         Runs until measurement is interrupted. Data is continuously saved if checkbox checked.
         """
-        for i in range(self.num_initial):
+#        for i in range(self.num_initial):
+
+        t0 = time.time()
+        i = 0
+        while time.time() - t0 < self.delay_gate:
+            
             ds_reading = self.read_currents()
+            self.save_array[i, 0] = (ds_reading[2] - t0)*1000
             self.save_array[i, 2] = ds_reading[0]
             self.save_array[i, 3] = ds_reading[1]
-        for i in range(self.num_setpoint + 1):
-            ds_reading = self.read_currents()
-            self.save_array[i + self.num_initial, 2] = ds_reading[0]
-            self.save_array[i + self.num_initial, 3] = ds_reading[1]
+            i += 1
 
+        t1 = time.time()
+        while time.time() - t1 < (self.gate_time):
+#        for i in range(self.num_setpoint + 1):
+
+            self.g_device.source_V(self.setpoint)
+            ds_reading = self.read_currents()
+            self.save_array[i, 0] = (ds_reading[2] - t0)*1000
+            self.save_array[i, 1] = self.setpoint
+            self.save_array[i, 2] = ds_reading[0]
+            self.save_array[i, 3] = ds_reading[1]
+            i += 1
+        
+        t1 = time.time()
+        while time.time() - t1 < (self.total_measurement_time - self.delay_gate - self.gate_time):
+
+            self.g_device.source_V(self.initial_gate_setting)
+            ds_reading = self.read_currents()
+            self.save_array[i, 0] = (ds_reading[2] - t0)*1000
+            self.save_array[i, 1] = self.initial_gate_setting
+            self.save_array[i, 2] = ds_reading[0]
+            self.save_array[i, 3] = ds_reading[1]
+            i += 1
+        
+        self.save_array[:,0] -= self.save_array[0,0]
+        self.n_pts = int(i)
+        
     def read_currents(self):
         '''
         Read both sourcemeters, taking software averages.
@@ -168,7 +202,7 @@ class TransientStepResponseMeasure(Measurement):
             time.sleep(self.delay_between_averages * .001)
         ds_current_avg = np.mean(ds_current_read)
         ds_std = np.std(ds_current_read, ddof = 1)
-        return [ds_current_avg, ds_std]
+        return [ds_current_avg, ds_std, time.time()]
 
     def post_run(self):
         '''
@@ -182,7 +216,7 @@ class TransientStepResponseMeasure(Measurement):
         v_ds_info = 'V_DS =\t%g' % self.drain_bias
         info_footer = v_ds_info
         info_header = 'Time (ms)\tV_G (V)\tI_DS(A)\tI_DS error (A)'
-        np.savetxt(self.app.settings['save_dir'] + "/" + self.app.settings['sample'] + append, self.save_array, fmt = '%.10f',
+        np.savetxt(self.app.settings['save_dir'] + "/" + self.app.settings['sample'] + append, self.save_array[:self.n_pts,:], fmt = '%.10f',
             header = info_header, footer = info_footer)
 
     def check_filename(self, append):
