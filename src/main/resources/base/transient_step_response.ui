@@ -7,13 +7,23 @@
     <x>0</x>
     <y>0</y>
     <width>766</width>
-    <height>599</height>
+    <height>813</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_4">
+   <item row="1" column="1">
+    <widget class="QFrame" name="frame_4">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="1">
     <widget class="QFrame" name="graph_container">
      <property name="frameShape">
@@ -23,16 +33,6 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_5"/>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QFrame" name="frame_4">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
     </widget>
    </item>
    <item row="0" column="0" rowspan="2">
@@ -195,225 +195,127 @@
         <property name="title">
          <string>Measurement Settings</string>
         </property>
-        <widget class="QDoubleSpinBox" name="first_bias_settle_doubleSpinBox">
-         <property name="geometry">
-          <rect>
-           <x>188</x>
-           <y>51</y>
-           <width>91</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_15">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>51</y>
-           <width>98</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>First Bias Settle (ms)</string>
-         </property>
-        </widget>
-        <widget class="QDoubleSpinBox" name="drain_bias_doubleSpinBox">
-         <property name="geometry">
-          <rect>
-           <x>188</x>
-           <y>24</y>
-           <width>91</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_12">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>132</y>
-           <width>57</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Gate (V)</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_14">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>105</y>
-           <width>69</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Delay Gate (s)</string>
-         </property>
-        </widget>
-        <widget class="QDoubleSpinBox" name="initial_gate_setting_doubleSpinBox">
-         <property name="geometry">
-          <rect>
-           <x>188</x>
-           <y>78</y>
-           <width>91</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_11">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>213</y>
-           <width>133</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Total Measurement Time (s)</string>
-         </property>
-        </widget>
-        <widget class="QDoubleSpinBox" name="delay_between_averages_doubleSpinBox">
-         <property name="geometry">
-          <rect>
-           <x>188</x>
-           <y>186</y>
-           <width>91</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_8">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>78</y>
-           <width>172</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Initial Gate Setting (V)</string>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_10">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>186</y>
-           <width>172</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Delay Between Averages (ms)</string>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
-        <widget class="QDoubleSpinBox" name="total_measurement_time_doubleSpinBox">
-         <property name="geometry">
-          <rect>
-           <x>188</x>
-           <y>213</y>
-           <width>91</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QDoubleSpinBox" name="software_averages_doubleSpinBox">
-         <property name="geometry">
-          <rect>
-           <x>188</x>
-           <y>159</y>
-           <width>91</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_9">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>159</y>
-           <width>93</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Software Averages</string>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
-        <widget class="QDoubleSpinBox" name="delay_gate_doubleSpinBox">
-         <property name="geometry">
-          <rect>
-           <x>100</x>
-           <y>100</y>
-           <width>81</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QDoubleSpinBox" name="setpoint_doubleSpinBox">
-         <property name="geometry">
-          <rect>
-           <x>188</x>
-           <y>132</y>
-           <width>91</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_4">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>24</y>
-           <width>64</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Drain Bias (V)</string>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_16">
-         <property name="geometry">
-          <rect>
-           <x>200</x>
-           <y>100</y>
-           <width>69</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Gate on (s)</string>
-         </property>
-        </widget>
-        <widget class="QDoubleSpinBox" name="gate_time_doubleSpinBox">
-         <property name="geometry">
-          <rect>
-           <x>270</x>
-           <y>100</y>
-           <width>91</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_14">
+           <property name="text">
+            <string>Delay Gate (s)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2" colspan="2">
+          <widget class="QDoubleSpinBox" name="drain_bias_doubleSpinBox"/>
+         </item>
+         <item row="3" column="2" colspan="2">
+          <widget class="QDoubleSpinBox" name="delay_gate_doubleSpinBox"/>
+         </item>
+         <item row="1" column="2" colspan="2">
+          <widget class="QDoubleSpinBox" name="initial_gate_setting_doubleSpinBox"/>
+         </item>
+         <item row="2" column="2" colspan="2">
+          <widget class="QDoubleSpinBox" name="first_bias_settle_doubleSpinBox"/>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_15">
+           <property name="text">
+            <string>First Bias Settle (ms)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="label_12">
+           <property name="text">
+            <string>Gate (V)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="label_9">
+           <property name="text">
+            <string>Software Avg</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="0" colspan="2">
+          <widget class="QLabel" name="label_10">
+           <property name="text">
+            <string>Delay bw Avg (ms)</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="2" colspan="2">
+          <widget class="QDoubleSpinBox" name="setpoint_doubleSpinBox"/>
+         </item>
+         <item row="9" column="2" colspan="2">
+          <widget class="QDoubleSpinBox" name="total_measurement_time_doubleSpinBox"/>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_16">
+           <property name="text">
+            <string>Gate on (s)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="3">
+          <widget class="QDoubleSpinBox" name="num_cycles_doubleSpinBox">
+           <property name="decimals">
+            <number>0</number>
+           </property>
+           <property name="minimum">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="2" colspan="2">
+          <widget class="QDoubleSpinBox" name="software_averages_doubleSpinBox"/>
+         </item>
+         <item row="1" column="0" colspan="2">
+          <widget class="QLabel" name="label_8">
+           <property name="text">
+            <string>Initial Gate Setting (V)</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="2" colspan="2">
+          <widget class="QDoubleSpinBox" name="gate_time_doubleSpinBox"/>
+         </item>
+         <item row="8" column="2" colspan="2">
+          <widget class="QDoubleSpinBox" name="delay_between_averages_doubleSpinBox"/>
+         </item>
+         <item row="9" column="0" colspan="2">
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>Total Measurement Time (s)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="0" colspan="2">
+          <widget class="QLabel" name="label_17">
+           <property name="text">
+            <string>Num. of cycles</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Drain Bias (V)</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
@@ -444,9 +346,7 @@
   <tabstop>manual_range_comboBox</tabstop>
   <tabstop>current_compliance_ds_doubleSpinBox</tabstop>
   <tabstop>nplc_doubleSpinBox</tabstop>
-  <tabstop>drain_bias_doubleSpinBox</tabstop>
   <tabstop>first_bias_settle_doubleSpinBox</tabstop>
-  <tabstop>initial_gate_setting_doubleSpinBox</tabstop>
   <tabstop>delay_gate_doubleSpinBox</tabstop>
   <tabstop>setpoint_doubleSpinBox</tabstop>
   <tabstop>software_averages_doubleSpinBox</tabstop>

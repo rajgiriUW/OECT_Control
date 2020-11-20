@@ -110,9 +110,10 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.g_plot.setLabel('bottom', 'V_G')
         
     def run(self):
-        self.read_settings = self.transfer_read_from_settings
-        GeneralCurveMeasure.pre_run(self)
+        self.read_settings = self.transfer_read_from_settings #overrides general_curve read_settings
+        self.num_transfer_curves = int(self.ui.num_transfer_curves_doubleSpinBox.value())
         for i in range(self.num_transfer_curves):
+            GeneralCurveMeasure.pre_run(self)
             GeneralCurveMeasure.run(self)
             GeneralCurveMeasure.post_run(self)
             self.sweep_device.source_V(self.v_sweep_start) #reset to sweep start voltage before running another curve
@@ -122,8 +123,10 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.READ_NUMBER = 1 #reset file numbering for output curves
 
         self.read_settings = self.output_read_from_settings
-        GeneralCurveMeasure.pre_run(self)
+        self.num_output_curves = int(self.ui.num_output_curves_doubleSpinBox.value())
+        self.output_v_g_values = self.read_output_v_g_spinboxes()
         for v_g_value in self.output_v_g_values:
+            GeneralCurveMeasure.pre_run(self)
             self.ui.v_g_doubleSpinBox.setValue(v_g_value)
             self.v_constant = self.settings['V_G'] = v_g_value
             self.constant_device.source_V(self.v_constant)
@@ -160,6 +163,8 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.return_sweep = self.settings['G_sweep_return_sweep'] = self.ui.return_sweep_transfer_checkBox.isChecked()
         self.v_constant = self.settings['V_DS'] = self.ui.v_ds_doubleSpinBox.value()
         self.num_transfer_curves = self.settings['number_of_transfer_curves'] = int(self.ui.num_transfer_curves_doubleSpinBox.value())
+        self.is_test_wrapper = True
+        print('##########test')
 
     def output_read_from_settings(self):
         self.constant_current_compliance = self.constant_hw.settings['current_compliance'] = self.ui.current_compliance_g_output_doubleSpinBox.value()

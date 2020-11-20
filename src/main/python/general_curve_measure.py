@@ -40,6 +40,7 @@ class GeneralCurveMeasure(Measurement):
             '400 x 20': [400, 20], '200 x 20': [200, 20], '100 x 20': [100, 20]}
         self.settings.New('dimension', str, choices = self.dimension_choice.keys(), initial = '4000 x 20')
         self.settings.New('thickness', unit = "nm", initial = 50)
+        self.settings.New('num_cycles', int, initial=1)
 
     def create_settings(self):
                 # Measurement Specific Settings
@@ -115,6 +116,7 @@ class GeneralCurveMeasure(Measurement):
         self.settings_dict['thickness'].connect_to_widget(self.ui.thickness_doubleSpinBox)
         self.settings_dict['%s_sweep_return_sweep' % self.SWEEP].connect_to_widget(self.ui.return_sweep_checkBox)
         self.settings_dict['V_%s' % self.CONSTANT].connect_to_widget(self.ui.v_constant_doubleSpinBox)
+        self.settings_dict['num_cycles'].connect_to_widget(self.ui.num_cycles_doubleSpinBox)
 
  
         # # Set up pyqtgraph graph_layout in the UI
@@ -166,7 +168,9 @@ class GeneralCurveMeasure(Measurement):
         self.return_sweep = self.settings['%s_sweep_return_sweep' % self.SWEEP]
         self.dimension = self.settings['dimension']
         self.thickness = self.settings['thickness']
-
+        self.num_cycles = self.settings['num_cycles']
+        self.is_test_wrapper = False # checks if test GUI calling this or not
+        print('############gen')
     
     def pre_run(self):
         self.check_filename(".txt")
@@ -194,9 +198,6 @@ class GeneralCurveMeasure(Measurement):
             self.sweep_device.measure_current(nplc = self.sweep_nplc)
             # self.constant_device.measure_current(nplc = self.sweep_nplc)
             self.constant_device.measure_current()
-
-
-
         
         self.num_steps = np.abs(int(np.ceil(((self.v_sweep_finish - self.v_sweep_start)/self.v_sweep_step_size)))) + 1 #add 1 to account for start voltage
         self.voltages = np.arange(start = self.v_sweep_start, stop = self.v_sweep_finish + self.v_sweep_step_size, step = self.v_sweep_step_size) #add an extra step to stop since arange is exclusive
@@ -216,8 +217,7 @@ class GeneralCurveMeasure(Measurement):
 
         time.sleep(self.first_bias_settle * .001)
         self.doing_return_sweep = False
-
-
+        
 
     def run(self):
         """
@@ -227,13 +227,29 @@ class GeneralCurveMeasure(Measurement):
 
         Runs until measurement is interrupted. Data is continuously saved if checkbox checked.
         """
-        self.do_sweep()
-        if self.return_sweep: #perform return sweep
-            self.doing_return_sweep = True
-            #self.v_sweep_step_size *= -1
-            #self.do_sweep()
-            #self.v_sweep_step_size *= -1
 
+        self.finished = False # flag for post-run
+        
+        if self.is_test_wrapper:
+            
+            self.do_sweep()
+            if self.return_sweep: 
+                self.doing_return_sweep = True
+
+        else:
+            self.num_cycles = self.settings['num_cycles']        
+            print(self.num_cycles)
+            
+            for cycle in range(self.num_cycles):
+                self.do_sweep()
+                if self.return_sweep: 
+                    self.doing_return_sweep = True
+                if cycle < self.num_cycles-1: # avoid duplicate final run
+                    self.post_run()
+                self.READ_NUMBER += 1
+            self.READ_NUMBER -= 1 
+            
+        self.finished = True
 
     def do_sweep(self):
         '''
@@ -242,12 +258,9 @@ class GeneralCurveMeasure(Measurement):
         num_steps = self.num_steps
         if self.doing_return_sweep: 
             num_steps -= 1
-        #for i in range(num_steps):
 
         for i, v in enumerate(self.voltages):
-            #print(i, v)
-            #self.source_voltage += self.v_sweep_step_size
-            #self.sweep_device.source_V(self.source_voltage)
+
             self.sweep_device.source_V(v)
             time.sleep(self.preread_delay * .001)
             current_readings = self.read_currents()
@@ -287,8 +300,11 @@ class GeneralCurveMeasure(Measurement):
         '''
         Format and save measurement data.
         '''
-        self.g_device.reset()
-        self.ds_device.reset()
+        if self.finished:
+        
+            self.g_device.reset()
+            self.ds_device.reset()
+            
         if self.SWEEP == 'DS':
             append = '_output_curve%g.txt' % self.READ_NUMBER
         else:
@@ -302,8 +318,9 @@ class GeneralCurveMeasure(Measurement):
         thickness_info = 'Thickness/nm=\t%g' % self.thickness
         info_footer = v_constant_info + "\n" + avgs_info + "\n" + width_info + "\n" + length_info + "\n" + thickness_info
         info_header = 'V_%s\tI_G (A)\tI_G Error (A)\tI_DS (A)\tI_DS Error (A)' % (self.CONSTANT)
-        np.savetxt(self.app.settings['save_dir']+"/"+ self.app.settings['sample'] + append, self.save_array, fmt = '%.10f', 
-            header = info_header, footer = info_footer)
+        np.savetxt(self.app.settings['save_dir']+"/"+ self.app.settings['sample'] + append, 
+                   self.save_array, fmt = '%.10f', delimiter='\t',
+                   header = info_header, footer = info_footer)
 
     def check_filename(self, append):
         '''
