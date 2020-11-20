@@ -2,3 +2,4 @@ data/
 log/
 __pycache__/
 target/
+*.pyc
