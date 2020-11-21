@@ -233,7 +233,7 @@ class TransientStepResponseMeasure(Measurement):
         info_header = 'Time (ms)\tV_G (V)\tI_DS(A)\tI_DS error (A)'
         np.savetxt(self.app.settings['save_dir'] + "/" + self.app.settings['sample'] + append, 
                    self.save_array[:self.n_pts,:], fmt = '%.10f', delimiter='\t',
-                   header = info_header, footer = info_footer)
+                   comments='', header = info_header, footer = info_footer)
 
     def check_filename(self, append):
         '''

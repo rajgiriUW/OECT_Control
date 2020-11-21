@@ -170,7 +170,6 @@ class GeneralCurveMeasure(Measurement):
         self.thickness = self.settings['thickness']
         self.num_cycles = self.settings['num_cycles']
         self.is_test_wrapper = False # checks if test GUI calling this or not
-        print('############gen')
     
     def pre_run(self):
         self.check_filename(".txt")
@@ -200,12 +199,14 @@ class GeneralCurveMeasure(Measurement):
             self.constant_device.measure_current()
         
         self.num_steps = np.abs(int(np.ceil(((self.v_sweep_finish - self.v_sweep_start)/self.v_sweep_step_size)))) + 1 #add 1 to account for start voltage
-        self.voltages = np.arange(start = self.v_sweep_start, stop = self.v_sweep_finish + self.v_sweep_step_size, step = self.v_sweep_step_size) #add an extra step to stop since arange is exclusive
+        self.voltages = np.arange(start = self.v_sweep_start, 
+                                  stop = self.v_sweep_finish + self.v_sweep_step_size, 
+                                  step = self.v_sweep_step_size) #add an extra step to stop since arange is exclusive
         if self.return_sweep:
-            self.save_array = np.zeros(shape=(self.num_steps * 2 - 1, 5))
+            
             self.reverse_voltages = np.arange(start = self.v_sweep_finish - self.v_sweep_step_size, stop = self.v_sweep_start - (self.v_sweep_step_size/2), step = -self.v_sweep_step_size) #step size divided by two then subtracted to ensure correct stop point
-
             self.voltages = np.concatenate((self.voltages, self.reverse_voltages))
+            self.save_array = np.zeros(shape=(self.voltages.shape[0], 5))
         else:
             self.save_array = np.zeros(shape=(self.voltages.shape[0], 5))
         self.save_array[:,0] = self.voltages
@@ -317,9 +318,9 @@ class GeneralCurveMeasure(Measurement):
         length_info = 'Length/um=\t%g' % self.dimension_choice[self.dimension][1]
         thickness_info = 'Thickness/nm=\t%g' % self.thickness
         info_footer = v_constant_info + "\n" + avgs_info + "\n" + width_info + "\n" + length_info + "\n" + thickness_info
-        info_header = 'V_%s\tI_G (A)\tI_G Error (A)\tI_DS (A)\tI_DS Error (A)' % (self.CONSTANT)
+        info_header = 'V_%s\tI_G (A)\tI_G Error (A)\tI_DS (A)\tI_DS Error (A)' % (self.SWEEP)
         np.savetxt(self.app.settings['save_dir']+"/"+ self.app.settings['sample'] + append, 
-                   self.save_array, fmt = '%.10f', delimiter='\t',
+                   self.save_array, fmt = '%.10f', delimiter='\t',comments='',
                    header = info_header, footer = info_footer)
 
     def check_filename(self, append):

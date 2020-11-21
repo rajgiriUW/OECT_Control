@@ -37,7 +37,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
     def setup(self):
         self.name = "TestDevice"
         self.ui_filename = self.app.appctxt.get_resource("test_device.ui")
-        
+
         #Load ui file and convert it to a live QWidget of the user interface
         self.ui = load_qt_ui_file(self.ui_filename)
         TransferCurveMeasure.create_settings(self)
@@ -46,9 +46,9 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.switch_setting() #configure variables for transfer curve
 
         #create automeasure specific settings
-        self.dimension_choice = {'4000 x 20': [4000, 20], '2000 x 20': [2000, 20], '1000 x 20': [1000, 20], '800 x 20': [800, 20], 
+        self.dimension_choice = {'4000 x 20': [4000, 20], '2000 x 20': [2000, 20], '1000 x 20': [1000, 20], '800 x 20': [800, 20],
             '400 x 20': [400, 20], '200 x 20': [200, 20], '100 x 20': [100, 20]}
-        self.settings.New('number_of_transfer_curves', int, initial = 1, vmin = 1)        
+        self.settings.New('number_of_transfer_curves', int, initial = 1, vmin = 1)
         self.settings.New('number_of_output_curves', int, initial = 1, vmin = 1, vmax = 5)
         self.settings.New('dimension', str, choices = self.dimension_choice.keys(), initial = '4000 x 20')
         self.settings.New('thickness', unit = "nm", initial = 50)
@@ -57,7 +57,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
     def setup_figure(self):
         '''
         UI event handling.
-        Connects only sidebar measurement settings to ui. 
+        Connects only sidebar measurement settings to ui.
         ***for automeasure, exclusively change hardware settings for each measurement using the ui.
         '''
         self.ui.start_pushButton.clicked.connect(self.start)
@@ -79,7 +79,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.ds_plot.setLabel('left', 'I_DS')
 
         self.graph_layout.window().setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
-        
+
     def on_output_curves_changed(self):
         '''
         Enable/disable correct number of V_G spinboxes depending on how many output curves specified.
@@ -89,7 +89,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
             self.v_g_spinboxes[i].setEnabled(True)
         for i in range(num_curves, 5):
             self.v_g_spinboxes[i].setEnabled(False)
-        
+
     def update_display(self):
         GeneralCurveMeasure.update_display(self)
         if (self.switched):
@@ -108,7 +108,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.thickness = self.settings['thickness'] = self.ui.thickness_doubleSpinBox.value()
         self.ds_plot.setLabel('bottom', 'V_G')
         self.g_plot.setLabel('bottom', 'V_G')
-        
+
     def run(self):
         self.read_settings = self.transfer_read_from_settings #overrides general_curve read_settings
         self.num_transfer_curves = int(self.ui.num_transfer_curves_doubleSpinBox.value())
@@ -123,11 +123,12 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.READ_NUMBER = 1 #reset file numbering for output curves
 
         self.read_settings = self.output_read_from_settings
-        self.num_output_curves = int(self.ui.num_output_curves_doubleSpinBox.value())
+        self.num_output_curves = self.settings['number_of_output_curves'] = int(self.ui.num_output_curves_doubleSpinBox.value())
         self.output_v_g_values = self.read_output_v_g_spinboxes()
+        print(self.output_v_g_values)
         for v_g_value in self.output_v_g_values:
             GeneralCurveMeasure.pre_run(self)
-            self.ui.v_g_doubleSpinBox.setValue(v_g_value)
+            #self.ui.v_g_doubleSpinBox.setValue(v_g_value)
             self.v_constant = self.settings['V_G'] = v_g_value
             self.constant_device.source_V(self.v_constant)
             GeneralCurveMeasure.run(self)
@@ -152,7 +153,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.sweep_manual_range = self.sweep_hw.settings['manual_range'] = self.ui.manual_range_g_comboBox.currentText()
         self.sweep_current_compliance = self.sweep_hw.settings['current_compliance'] = self.ui.current_compliance_g_output_doubleSpinBox.value()
         self.sweep_nplc = self.sweep_hw.settings['NPLC'] = self.ui.nplc_g_doubleSpinBox.value()
-        
+
         self.v_sweep_start = self.settings['V_G_start'] = self.ui.v_g_start_doubleSpinBox.value()
         self.v_sweep_finish = self.settings['V_G_finish'] = self.ui.v_g_finish_doubleSpinBox.value()
         self.v_sweep_step_size = self.settings['V_G_step_size'] = self.ui.v_g_step_size_doubleSpinBox.value()
@@ -164,7 +165,6 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.v_constant = self.settings['V_DS'] = self.ui.v_ds_doubleSpinBox.value()
         self.num_transfer_curves = self.settings['number_of_transfer_curves'] = int(self.ui.num_transfer_curves_doubleSpinBox.value())
         self.is_test_wrapper = True
-        print('##########test')
 
     def output_read_from_settings(self):
         self.constant_current_compliance = self.constant_hw.settings['current_compliance'] = self.ui.current_compliance_g_output_doubleSpinBox.value()
@@ -174,7 +174,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.sweep_manual_range = self.sweep_hw.settings['manual_range'] = self.ui.manual_range_ds_comboBox.currentText()
         self.sweep_current_compliance = self.sweep_hw.settings['current_compliance'] = self.ui.current_compliance_ds_output_doubleSpinBox.value()
         self.sweep_nplc = self.sweep_hw.settings['NPLC'] = self.ui.nplc_ds_doubleSpinBox.value()
-        
+
         self.v_sweep_start = self.settings['V_DS_start'] = self.ui.v_ds_start_doubleSpinBox.value()
         self.v_sweep_finish = self.settings['V_DS_finish'] = self.ui.v_ds_finish_doubleSpinBox.value()
         self.v_sweep_step_size = self.settings['V_DS_step_size'] = self.ui.v_ds_step_size_doubleSpinBox.value()
@@ -184,8 +184,6 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.first_bias_settle = self.settings['DS_sweep_first_bias_settle'] = self.ui.first_bias_settle_output_doubleSpinBox.value()
         self.return_sweep = self.settings['DS_sweep_return_sweep'] = self.ui.return_sweep_output_checkBox.isChecked()
         self.v_constant = self.settings['V_G'] = self.ui.v_g1_doubleSpinBox.value()
-        self.num_output_curves = self.settings['number_of_output_curves'] = int(self.ui.num_output_curves_doubleSpinBox.value())
-        self.output_v_g_values = self.read_output_v_g_spinboxes()
 
     def read_output_v_g_spinboxes(self):
         output_v_g_values = np.zeros(self.num_output_curves)
