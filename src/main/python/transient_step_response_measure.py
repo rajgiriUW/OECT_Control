@@ -79,8 +79,8 @@ class TransientStepResponseMeasure(Measurement):
         self.plot.setLabel('left', 'I_DS')
         
     def update_display(self):
-            self.plot.plot(self.time_array[:len(self.save_array[:,2])], 
-                           self.save_array[:,2], pen = 'r', clear = True)
+        self.plot.plot(self.time_array[:self.counts], 
+                       self.save_array[:self.counts,2], pen = 'r', clear = True)
 
     def read_settings(self):
         '''
@@ -163,6 +163,7 @@ class TransientStepResponseMeasure(Measurement):
 #        for i in range(self.num_initial):
 
         i = 0
+        self.counts = 0
         t0 = time.time()
         for cycle in range(self.num_cycles):
             
@@ -176,11 +177,11 @@ class TransientStepResponseMeasure(Measurement):
                 self.save_array[i, 2] = ds_reading[0]
                 self.save_array[i, 3] = ds_reading[1]
                 i += 1
+                self.counts += 1
     
             t1 = time.time()
             while time.time() - t1 < (self.gate_time):
     #        for i in range(self.num_setpoint + 1):
-    
                 self.g_device.source_V(self.setpoint)
                 ds_reading = self.read_currents()
                 self.save_array[i, 0] = (ds_reading[2] - t0)*1000
@@ -188,6 +189,7 @@ class TransientStepResponseMeasure(Measurement):
                 self.save_array[i, 2] = ds_reading[0]
                 self.save_array[i, 3] = ds_reading[1]
                 i += 1
+                self.counts += 1
             
             t1 = time.time()
             while time.time() - t1 < (self.total_measurement_time - self.delay_gate - self.gate_time):
@@ -199,6 +201,7 @@ class TransientStepResponseMeasure(Measurement):
                 self.save_array[i, 2] = ds_reading[0]
                 self.save_array[i, 3] = ds_reading[1]
                 i += 1
+                self.counts += 1
             
             self.save_array[:,0] -= self.save_array[0,0]
             self.time_array[start:i] = self.save_array[start:i,0] #update time

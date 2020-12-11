@@ -137,9 +137,13 @@ class GeneralCurveMeasure(Measurement):
         
     def update_display(self):
         if hasattr(self, 'ds_reading') and hasattr(self, 'g_reading'):
+            
             if self.doing_return_sweep: #plot only return sweep data
-                self.g_plot.plot(self.voltages[self.num_steps:], self.save_array[self.num_steps:, 1], pen = 'r', clear = True)
-                self.ds_plot.plot(self.voltages[self.num_steps:], self.save_array[self.num_steps:, 3], pen = 'b', clear = True)
+                self.g_plot.plot(self.voltages[:], self.save_array[:, 1], pen = 'b', clear = True)
+                self.ds_plot.plot(self.voltages[:], self.save_array[:, 3], pen = 'r', clear = True)
+#                self.g_plot.plot(self.voltages[:self.num_steps], self.save_array[:self.num_steps, 1], pen = 'r', clear = False)
+#                self.ds_plot.plot(self.voltages[:self.num_steps], self.save_array[:self.num_steps, 3], pen = 'b', clear = False)
+
             else: #plot only initial sweep
                 self.g_plot.plot(self.voltages[:self.num_steps], self.save_array[:self.num_steps, 1], pen = 'r', clear = True)
                 self.ds_plot.plot(self.voltages[:self.num_steps], self.save_array[:self.num_steps, 3], pen = 'b', clear = True)

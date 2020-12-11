@@ -6,6 +6,7 @@ from PyQt5 import *
 import numpy as np
 import time
 import os.path
+import configparser
 
 from general_curve_measure import GeneralCurveMeasure
 from output_curve_measure import OutputCurveMeasure
@@ -143,7 +144,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
     def post_run(self):
         if self.SWEEP == "DS": self.switch_setting() #
         self.READ_NUMBER = 1
-
+        self.make_config()
 
     def transfer_read_from_settings(self):
         self.constant_current_compliance = self.constant_hw.settings['current_compliance'] = self.ui.current_compliance_ds_output_doubleSpinBox.value()
@@ -166,6 +167,10 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.num_transfer_curves = self.settings['number_of_transfer_curves'] = int(self.ui.num_transfer_curves_doubleSpinBox.value())
         self.is_test_wrapper = True
 
+        self.transfer_preread = self.preread_delay # for config file
+        self.transfer_first_bias_settle = self.first_bias_settle
+        self.transfer_vds = self.v_constant
+
     def output_read_from_settings(self):
         self.constant_current_compliance = self.constant_hw.settings['current_compliance'] = self.ui.current_compliance_g_output_doubleSpinBox.value()
 
@@ -184,6 +189,9 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.first_bias_settle = self.settings['DS_sweep_first_bias_settle'] = self.ui.first_bias_settle_output_doubleSpinBox.value()
         self.return_sweep = self.settings['DS_sweep_return_sweep'] = self.ui.return_sweep_output_checkBox.isChecked()
         self.v_constant = self.settings['V_G'] = self.ui.v_g1_doubleSpinBox.value()
+
+        self.output_preread = self.preread_delay # for config file
+        self.output_first_bias_settle = self.first_bias_settle
 
     def read_output_v_g_spinboxes(self):
         output_v_g_values = np.zeros(self.num_output_curves)
@@ -214,3 +222,32 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.settings.DS_sweep_return_sweep.connect_to_widget(self.ui.return_sweep_output_checkBox)
         self.settings.V_G.connect_to_widget(self.ui.v_g1_doubleSpinBox)
         self.settings.number_of_output_curves.connect_to_widget(self.ui.num_output_curves_doubleSpinBox)
+
+
+    def make_config(self):
+        '''
+        If a config file does not exist, this will generate one automatically.
+        
+        '''
+        config = configparser.ConfigParser()
+        config.optionxform = str
+    
+        config['Dimensions'] = {'Width (um)': self.dimension_choice[self.dimension][0], 
+                                'Length (um)': self.dimension_choice[self.dimension][1]}
+        config['Transfer'] = {'Preread (ms)': self.transfer_preread,
+                              'First Bias (ms)': self.transfer_first_bias_settle,
+                              'Vds (V)': self.transfer_vds}
+    
+        config['Output'] = {'Preread (ms)': self.output_preread,
+                            'First Bias (ms)': self.output_first_bias_settle,
+                            'Output Vgs': len(self.output_v_g_values)}
+        
+        for n, o in enumerate(self.output_v_g_values):
+            key = 'Vgs (V) ' + str(n)
+            config['Output'][key] = str(o)
+            
+        path = self.app.settings['save_dir']+"/"+ self.app.settings['sample'] + r'_config.cfg'
+        with open(path, 'w') as configfile:
+            config.write(configfile)
+    
+        return path + r'\config.cfg'
