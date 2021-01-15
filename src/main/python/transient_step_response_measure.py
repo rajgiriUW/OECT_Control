@@ -48,6 +48,9 @@ class TransientStepResponseMeasure(Measurement):
         """
         self.g_hw.settings.current_compliance.connect_to_widget(self.ui.current_compliance_g_doubleSpinBox)
         self.g_hw.settings.voltage_compliance.connect_to_widget(self.ui.voltage_compliance_g_doubleSpinBox)
+        
+        self.g_hw.settings.source_mode.connect_to_widget(self.ui.source_mode_comboBox)
+        
         self.ds_hw.settings.autorange.connect_to_widget(self.ui.autorange_checkBox)
         self.ds_hw.settings.autozero.connect_to_widget(self.ui.autozero_comboBox)
         self.ds_hw.settings.manual_range.connect_to_widget(self.ui.manual_range_comboBox)
@@ -118,6 +121,8 @@ class TransientStepResponseMeasure(Measurement):
         self.ds_device.reset()
         self.read_settings()
 
+        print('+++++++++++',  self.g_source_mode)
+
         #configure keithleys
         if self.g_source_mode == 'VOLT':
             self.g_device.write_current_compliance(self.g_current_compliance)
@@ -138,18 +143,21 @@ class TransientStepResponseMeasure(Measurement):
         self.num_initial = int((self.delay_gate * 1000)/self.time_for_avg)
         self.num_setpoint = int(((self.total_measurement_time - self.delay_gate) * 1000)/self.time_for_avg)
 
-        self.save_array = np.zeros(shape=(self.time_array.shape[0], 4))
+        self.save_array = np.zeros(shape=(self.time_array.shape[0], 6))
         self.save_array[:,0] = self.time_array
         self.save_array[:self.num_initial, 1] = self.initial_gate_setting
         self.save_array[self.num_initial:, 1] = self.setpoint
 
+        self.ds_device.source_V(self.drain_bias)
+        if self.g_source_mode == 'VOLT':
+            self.g_device.source_V(self.initial_gate_setting)
+        else:
+            self.g_device.source_I(self.initial_gate_setting)
+            
         #prepare hardware for read
         self.g_device.write_output_on()
         self.ds_device.write_output_on()
-        
-        self.g_device.source_V(self.initial_gate_setting)
-        self.ds_device.source_V(self.drain_bias)
-        
+            
         time.sleep(self.first_bias_settle * .001)
 
     def run(self):
@@ -163,43 +171,63 @@ class TransientStepResponseMeasure(Measurement):
 #        for i in range(self.num_initial):
 
         i = 0
+        
         self.counts = 0
         t0 = time.time()
         for cycle in range(self.num_cycles):
             
             start = i
             t1 = time.time()
-            self.g_device.source_V(self.initial_gate_setting)
+#            self.g_device.source_V(self.initial_gate_setting)
+            if self.g_source_mode == 'VOLT':
+                self.g_device.source_V(self.initial_gate_setting)
+            else:
+                self.g_device.source_I(self.initial_gate_setting)
+            
             while time.time() - t1 < self.delay_gate:
                 
                 ds_reading = self.read_currents()
                 self.save_array[i, 0] = (ds_reading[2] - t0)*1000
                 self.save_array[i, 2] = ds_reading[0]
                 self.save_array[i, 3] = ds_reading[1]
+                self.save_array[i, 4] = ds_reading[3]
+                self.save_array[i, 5] = ds_reading[4]
                 i += 1
                 self.counts += 1
     
             t1 = time.time()
             while time.time() - t1 < (self.gate_time):
-    #        for i in range(self.num_setpoint + 1):
-                self.g_device.source_V(self.setpoint)
+                
+                if self.g_source_mode == 'VOLT':
+                    self.g_device.source_V(self.setpoint)
+                else:
+                    self.g_device.source_I(self.setpoint)
+#                self.g_device.source_V(self.setpoint)
                 ds_reading = self.read_currents()
                 self.save_array[i, 0] = (ds_reading[2] - t0)*1000
                 self.save_array[i, 1] = self.setpoint
                 self.save_array[i, 2] = ds_reading[0]
                 self.save_array[i, 3] = ds_reading[1]
+                self.save_array[i, 4] = ds_reading[3]
+                self.save_array[i, 5] = ds_reading[4]
                 i += 1
                 self.counts += 1
             
             t1 = time.time()
             while time.time() - t1 < (self.total_measurement_time - self.delay_gate - self.gate_time):
     
-                self.g_device.source_V(self.initial_gate_setting)
+#                self.g_device.source_V(self.initial_gate_setting)
+                if self.g_source_mode == 'VOLT':
+                    self.g_device.source_V(self.initial_gate_setting)
+                else:
+                    self.g_device.source_I(self.initial_gate_setting)
                 ds_reading = self.read_currents()
                 self.save_array[i, 0] = (ds_reading[2] - t0)*1000
                 self.save_array[i, 1] = self.initial_gate_setting
                 self.save_array[i, 2] = ds_reading[0]
                 self.save_array[i, 3] = ds_reading[1]
+                self.save_array[i, 4] = ds_reading[3]
+                self.save_array[i, 5] = ds_reading[4]
                 i += 1
                 self.counts += 1
             
@@ -215,12 +243,15 @@ class TransientStepResponseMeasure(Measurement):
         Read both sourcemeters, taking software averages.
         '''
         ds_current_read = np.zeros(int(self.software_averages))
+        g_current_read = np.zeros(int(self.software_averages))
         for i in range(int(self.software_averages)):
             ds_current_read[i] = self.ds_device.read_I()
+            g_current_read[i] = self.g_device.read_I()
             time.sleep(self.delay_between_averages * .001)
         ds_current_avg = np.mean(ds_current_read)
         ds_std = np.std(ds_current_read, ddof = 1)
-        return [ds_current_avg, ds_std, time.time()]
+        g_std = np.std(g_current_read, ddof = 1)
+        return [ds_current_avg, ds_std, time.time(), g_current_read, g_std]
 
     def post_run(self):
         '''
@@ -233,7 +264,7 @@ class TransientStepResponseMeasure(Measurement):
         
         v_ds_info = 'V_DS =\t%g' % self.drain_bias
         info_footer = v_ds_info
-        info_header = 'Time (ms)\tV_G (V)\tI_DS(A)\tI_DS error (A)'
+        info_header = 'Time (ms)\tV_G (V)\tI_DS(A)\tI_DS error(A)\tI_G(A)\tI_G error(A)'
         np.savetxt(self.app.settings['save_dir'] + "/" + self.app.settings['sample'] + append, 
                    self.save_array[:self.n_pts,:], fmt = '%.10f', delimiter='\t',
                    comments='', header = info_header, footer = info_footer)
