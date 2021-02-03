@@ -173,7 +173,9 @@ class Keithley2400SourceMeter(object):
         self.send(':SYST:AZER:STAT ' + str(s))
 
     def write_source_mode(self, volt_or_curr):
-        self.send(":SOUR:%s:RANG:AUTO 1" % (volt_or_curr.upper()))
+        self.send(':SOUR:FUNC:MODE %s' % (volt_or_curr.upper()))
+        self.send(':SOUR:%s:MODE FIX' % (volt_or_curr.upper()))
+        self.send(':SOUR:%s:RANG:AUTO 1' % (volt_or_curr.upper()))
 
     def write_current_compliance(self, i_compliance):
         self.send(':SENS:CURR:PROT %g' % i_compliance)

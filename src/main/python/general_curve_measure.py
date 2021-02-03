@@ -48,7 +48,7 @@ class GeneralCurveMeasure(Measurement):
         # All settings are automatically added to   the Microscope user interface
 
         self.settings.New('V_%s_start' % self.SWEEP, unit = 'V', si = True, initial = -0.7)
-        self.settings.New('V_%s_finish' % self.SWEEP, unit = 'V', si = True, initial = 0.3)
+        self.settings.New('V_%s_finish' % self.SWEEP, unit = 'V', si = True, initial = 0.0)
         self.settings.New('V_%s_step_size' % self.SWEEP, unit = 'V', si = True, initial = 0.1)
         self.settings.New('%s_sweep_preread_delay' % self.SWEEP, unit = 'ms', si = True, initial = 5000)
         self.settings.New('%s_sweep_delay_between_averages' % self.SWEEP, unit = 'ms', si = True, initial = 200)
@@ -56,7 +56,7 @@ class GeneralCurveMeasure(Measurement):
         self.settings.New('%s_sweep_first_bias_settle' % self.SWEEP, unit = 'ms', si = True, initial = 2000)
         
         self.settings.New('%s_sweep_return_sweep' % self.SWEEP, bool, initial = True)
-        self.settings.New('V_%s' % self.CONSTANT, unit = 'V', si = True, initial = 0.1)
+        self.settings.New('V_%s' % self.CONSTANT, unit = 'V', si = True, initial = -0.6)
 
         # Define how often to update display during a run
         self.display_update_period = 0.1 

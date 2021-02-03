@@ -121,7 +121,7 @@ class TransientStepResponseMeasure(Measurement):
         self.ds_device.reset()
         self.read_settings()
 
-        print('+++++++++++',  self.g_source_mode)
+        self.g_device.write_source_mode(self.g_source_mode)
 
         #configure keithleys
         if self.g_source_mode == 'VOLT':
@@ -131,6 +131,7 @@ class TransientStepResponseMeasure(Measurement):
 
         self.ds_device.write_autozero(self.ds_autozero)
         self.ds_device.write_current_compliance(self.ds_current_compliance)
+        
         if not self.ds_autorange:
             self.ds_device.measure_current(nplc = self.ds_nplc, current = self.ds_manual_range, auto_range = False)
         else:
@@ -195,6 +196,9 @@ class TransientStepResponseMeasure(Measurement):
                 i += 1
                 self.counts += 1
     
+                if self.interrupt_measurement_called:
+                    break
+    
             t1 = time.time()
             while time.time() - t1 < (self.gate_time):
                 
@@ -212,6 +216,9 @@ class TransientStepResponseMeasure(Measurement):
                 self.save_array[i, 5] = ds_reading[4]
                 i += 1
                 self.counts += 1
+                
+                if self.interrupt_measurement_called:
+                    break
             
             t1 = time.time()
             while time.time() - t1 < (self.total_measurement_time - self.delay_gate - self.gate_time):
@@ -230,6 +237,9 @@ class TransientStepResponseMeasure(Measurement):
                 self.save_array[i, 5] = ds_reading[4]
                 i += 1
                 self.counts += 1
+                
+                if self.interrupt_measurement_called:
+                    break
             
             self.save_array[:,0] -= self.save_array[0,0]
             self.time_array[start:i] = self.save_array[start:i,0] #update time
@@ -244,10 +254,17 @@ class TransientStepResponseMeasure(Measurement):
         '''
         ds_current_read = np.zeros(int(self.software_averages))
         g_current_read = np.zeros(int(self.software_averages))
-        for i in range(int(self.software_averages)):
-            ds_current_read[i] = self.ds_device.read_I()
-            g_current_read[i] = self.g_device.read_I()
-            time.sleep(self.delay_between_averages * .001)
+        
+        if self.g_source_mode == 'VOLT':
+            for i in range(int(self.software_averages)):
+                ds_current_read[i] = self.ds_device.read_I()
+                g_current_read[i] = self.g_device.read_I()
+                time.sleep(self.delay_between_averages * .001)
+        else:
+            for i in range(int(self.software_averages)):
+                ds_current_read[i] = self.ds_device.read_I()
+                g_current_read[i] = self.g_device.read_V()
+                time.sleep(self.delay_between_averages * .001)
         ds_current_avg = np.mean(ds_current_read)
         ds_std = np.std(ds_current_read, ddof = 1)
         g_std = np.std(g_current_read, ddof = 1)
@@ -264,7 +281,11 @@ class TransientStepResponseMeasure(Measurement):
         
         v_ds_info = 'V_DS =\t%g' % self.drain_bias
         info_footer = v_ds_info
-        info_header = 'Time (ms)\tV_G (V)\tI_DS(A)\tI_DS error(A)\tI_G(A)\tI_G error(A)'
+        
+        if self.g_source_mode == 'VOLT':
+            info_header = 'Time (ms)\tV_G (V)\tI_DS(A)\tI_DS error(A)\tI_G(A)\tI_G error(A)'
+        else:
+            info_header = 'Time (ms)\tI_G (A)\tI_DS(A)\tI_DS error(A)\tV_G(V)\tI_G error(A)'
         np.savetxt(self.app.settings['save_dir'] + "/" + self.app.settings['sample'] + append, 
                    self.save_array[:self.n_pts,:], fmt = '%.10f', delimiter='\t',
                    comments='', header = info_header, footer = info_footer)
