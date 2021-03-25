@@ -53,42 +53,6 @@
             <string>Keithley 2400 1 (G)</string>
            </property>
            <layout class="QGridLayout" name="gridLayout_2">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Source Mode</string>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="2">
-             <widget class="QDoubleSpinBox" name="current_compliance_g_doubleSpinBox"/>
-            </item>
-            <item row="3" column="0" colspan="2">
-             <widget class="QLabel" name="label_3">
-              <property name="text">
-               <string>Voltage Compliance Limit (V)</string>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="2">
-             <widget class="QDoubleSpinBox" name="voltage_compliance_g_doubleSpinBox"/>
-            </item>
-            <item row="2" column="0" colspan="2">
-             <widget class="QLabel" name="label_2">
-              <property name="text">
-               <string>Current Compliance Limit (A)</string>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="2">
              <widget class="QComboBox" name="source_mode_comboBox">
               <item>
@@ -101,6 +65,49 @@
                 <string>CURR</string>
                </property>
               </item>
+             </widget>
+            </item>
+            <item row="3" column="2">
+             <widget class="QDoubleSpinBox" name="voltage_compliance_g_doubleSpinBox"/>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Source Mode</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0" colspan="2">
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Voltage Compliance Limit (V)</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QDoubleSpinBox" name="current_compliance_g_doubleSpinBox">
+              <property name="decimals">
+               <number>11</number>
+              </property>
+              <property name="singleStep">
+               <double>0.000010000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" colspan="2">
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>Current Compliance Limit (A)</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
            </layout>
@@ -286,7 +293,20 @@
           </widget>
          </item>
          <item row="4" column="2" colspan="2">
-          <widget class="QDoubleSpinBox" name="gate_time_doubleSpinBox"/>
+          <widget class="QDoubleSpinBox" name="gate_time_doubleSpinBox">
+           <property name="prefix">
+            <string/>
+           </property>
+           <property name="decimals">
+            <number>5</number>
+           </property>
+           <property name="maximum">
+            <double>103.989999999999995</double>
+           </property>
+           <property name="singleStep">
+            <double>0.010000000000000</double>
+           </property>
+          </widget>
          </item>
          <item row="8" column="2" colspan="2">
           <widget class="QDoubleSpinBox" name="delay_between_averages_doubleSpinBox"/>

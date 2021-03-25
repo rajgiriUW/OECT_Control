@@ -47,16 +47,16 @@ class GeneralCurveMeasure(Measurement):
       # This setting allows the option to save data to an h5 data file during a run
         # All settings are automatically added to   the Microscope user interface
 
-        self.settings.New('V_%s_start' % self.SWEEP, unit = 'V', si = True, initial = -0.7)
-        self.settings.New('V_%s_finish' % self.SWEEP, unit = 'V', si = True, initial = 0.0)
-        self.settings.New('V_%s_step_size' % self.SWEEP, unit = 'V', si = True, initial = 0.1)
+        self.settings.New('V_%s_start' % self.SWEEP, unit = 'V', si = True, initial = -0.7, spinbox_decimals = 3, spinbox_step=0.025)
+        self.settings.New('V_%s_finish' % self.SWEEP, unit = 'V', si = True, initial = 0.0, spinbox_decimals = 3, spinbox_step=0.025)
+        self.settings.New('V_%s_step_size' % self.SWEEP, unit = 'V', si = True, initial = 0.025, spinbox_decimals = 3, spinbox_step=0.025)
         self.settings.New('%s_sweep_preread_delay' % self.SWEEP, unit = 'ms', si = True, initial = 5000)
         self.settings.New('%s_sweep_delay_between_averages' % self.SWEEP, unit = 'ms', si = True, initial = 200)
         self.settings.New('%s_sweep_software_averages' % self.SWEEP, int, initial = 5, vmin = 1)
         self.settings.New('%s_sweep_first_bias_settle' % self.SWEEP, unit = 'ms', si = True, initial = 2000)
         
         self.settings.New('%s_sweep_return_sweep' % self.SWEEP, bool, initial = True)
-        self.settings.New('V_%s' % self.CONSTANT, unit = 'V', si = True, initial = -0.6)
+        self.settings.New('V_%s' % self.CONSTANT, unit = 'V', si = True, initial = -0.6, spinbox_decimals = 3, spinbox_step=0.025)
 
         # Define how often to update display during a run
         self.display_update_period = 0.1 
@@ -217,9 +217,10 @@ class GeneralCurveMeasure(Measurement):
         #prepare hardware for read
         self.sweep_device.write_output_on()
         self.constant_device.write_output_on()
-        self.source_voltage = self.v_sweep_start - self.v_sweep_step_size
+        self.source_voltage = self.v_sweep_start
+        self.sweep_device.source_V(self.source_voltage)
         self.constant_device.source_V(self.v_constant)
-
+        
         time.sleep(self.first_bias_settle * .001)
         self.doing_return_sweep = False
         
@@ -236,14 +237,13 @@ class GeneralCurveMeasure(Measurement):
         self.finished = False # flag for post-run
         
         if self.is_test_wrapper:
-            
+            # Avoids the cycles parameter
             self.do_sweep()
             if self.return_sweep: 
                 self.doing_return_sweep = True
 
         else:
             self.num_cycles = self.settings['num_cycles']        
-            print(self.num_cycles)
             
             for cycle in range(self.num_cycles):
                 self.do_sweep()
@@ -265,7 +265,7 @@ class GeneralCurveMeasure(Measurement):
             num_steps -= 1
 
         for i, v in enumerate(self.voltages):
-
+            
             self.sweep_device.source_V(v)
             time.sleep(self.preread_delay * .001)
             current_readings = self.read_currents()
@@ -282,8 +282,6 @@ class GeneralCurveMeasure(Measurement):
             self.save_array[save_row, 4] = ds_std
             if self.interrupt_measurement_called:
                 break
-
-            
 
     def read_currents(self):
         '''
@@ -338,4 +336,9 @@ class GeneralCurveMeasure(Measurement):
         if samplename == "":
             self.app.settings['sample'] = int(time.time())
         if (os.path.exists(directory+"/"+filename)):
-            self.app.settings['sample'] = samplename + str(int(time.time()))
+            
+            for i in range(100): #hard limit of 100 checks
+                
+                if not (os.path.exists(directory+"/"+samplename + '_' + str(i) + '_' + append)):
+                    self.app.settings['sample'] = samplename + '_' + str(i) + '_'
+                    break

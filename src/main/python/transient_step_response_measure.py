@@ -26,12 +26,12 @@ class TransientStepResponseMeasure(Measurement):
         self.ui_filename = self.app.appctxt.get_resource("transient_step_response.ui")
         self.ui = load_qt_ui_file(self.ui_filename)
 
-        self.settings.New('drain_bias', unit = 'V', initial = -.6)
+        self.settings.New('drain_bias', unit = 'V', initial = -0.6)
         self.settings.New('first_bias_settle', unit = 'ms', initial = 2000)
-        self.settings.New('initial_gate_setting', unit = 'V', initial = 0)
+        self.settings.New('initial_gate_setting', unit = 'V/A', initial = 0, spinbox_decimals = 8, spinbox_step=0.000001)
         self.settings.New('delay_gate', unit = 's', initial = 10)
-        self.settings.New('setpoint', unit = 'V', initial = .5)
-        self.settings.New('gate_time', unit = 's', initial = 10)
+        self.settings.New('setpoint', unit = 'V/A', initial = -0.5, spinbox_decimals = 8, spinbox_step=0.000001)
+        self.settings.New('gate_time', unit = 's', initial = 10, spinbox_decimals = 1, spinbox_step=1)
         self.settings.New('software_averages', int, initial = 1)
         self.settings.New('delay_between_averages', unit = 'ms', initial = 100)
         self.settings.New('total_measurement_time', unit = 's', initial = 30)
@@ -276,16 +276,16 @@ class TransientStepResponseMeasure(Measurement):
         '''
         self.g_device.reset()
         self.ds_device.reset()
-        append = '_new_current_vs_time.txt'
+        append = '_current_vs_time.txt'
         self.check_filename(append)
         
         v_ds_info = 'V_DS =\t%g' % self.drain_bias
         info_footer = v_ds_info
         
         if self.g_source_mode == 'VOLT':
-            info_header = 'Time (ms)\tV_G (V)\tI_DS(A)\tI_DS error(A)\tI_G(A)\tI_G error(A)'
+            info_header = 'Time (ms)\tV_G (V)\tI_DS (A)\tI_DS error(A)\tI_G (A)\tI_G error(A)'
         else:
-            info_header = 'Time (ms)\tI_G (A)\tI_DS(A)\tI_DS error(A)\tV_G(V)\tI_G error(A)'
+            info_header = 'Time (ms)\tI_G (A)\tI_DS (A)\tI_DS error(A)\tV_G (V)\tI_G error(A)'
         np.savetxt(self.app.settings['save_dir'] + "/" + self.app.settings['sample'] + append, 
                    self.save_array[:self.n_pts,:], fmt = '%.10f', delimiter='\t',
                    comments='', header = info_header, footer = info_footer)
@@ -301,4 +301,9 @@ class TransientStepResponseMeasure(Measurement):
         if samplename == "":
             self.app.settings['sample'] = int(time.time())
         if (os.path.exists(directory+"/"+filename)):
-            self.app.settings['sample'] = samplename + str(int(time.time()))
+            
+            for i in range(100): #hard limit of 100 checks
+                
+                if not (os.path.exists(directory+"/"+samplename + '_' + str(i) + '_' + append)):
+                    self.app.settings['sample'] = samplename + '_' + str(i) + '_'
+                    break

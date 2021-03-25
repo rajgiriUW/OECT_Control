@@ -39,8 +39,8 @@ class Keithley2400SourceMeterComponent(HardwareComponent): #object-->HardwareCom
         self.autorange = self.settings.New('autorange', bool, initial = self.AUTORANGE_DEFAULT)
         self.source_mode = self.settings.New('source_mode', str, choices = {'VOLT', 'CURR'}, initial = self.SOURCE_MODE_DEFAULT)
         self.manual_range = self.settings.New('manual_range', str, choices = self.i_ranges.keys(), initial = self.MANUAL_RANGE_DEFAULT)
-        self.current_compliance = self.settings.New('current_compliance', unit='A', initial = self.CURRENT_COMPLIANCE_DEFAULT)
-        self.voltage_compliance = self.settings.New('voltage_compliance', unit='V', initial = self.VOLTAGE_COMPLIANCE_DEFAULT)
+        self.current_compliance = self.settings.New('current_compliance', unit='A', initial = self.CURRENT_COMPLIANCE_DEFAULT, spinbox_decimals = 7, spinbox_step=0.000001)
+        self.voltage_compliance = self.settings.New('voltage_compliance', unit='V', initial = self.VOLTAGE_COMPLIANCE_DEFAULT, spinbox_decimals = 3, spinbox_step=0.001)
         self.NPLC = self.settings.New('NPLC', initial = self.NPLC_DEFAULT)
         
     def connect(self):

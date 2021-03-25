@@ -25,15 +25,9 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         '''
         Switch class variables and sweep/constant hardware references. Used for going between handling transfer and output measurements.
         '''
-        sweep_temp = self.SWEEP
-        constant_temp = self.CONSTANT
-        self.SWEEP = constant_temp
-        self.CONSTANT = sweep_temp
+        self.SWEEP, self.CONSTANT = self.CONSTANT, self.SWEEP
         if (hasattr(self, 'constant_hw') and hasattr(self, 'sweep_hw')):
-            sweep_hw_temp = self.sweep_hw
-            constant_hw_temp = self.constant_hw
-            self.sweep_hw = constant_hw_temp
-            self.constant_hw = sweep_hw_temp
+            self.sweep_hw, self.constant_hw = self.constant_hw, self.sweep_hw 
 
     def setup(self):
         self.name = "TestDevice"
@@ -126,8 +120,13 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.read_settings = self.output_read_from_settings
         self.num_output_curves = self.settings['number_of_output_curves'] = int(self.ui.num_output_curves_doubleSpinBox.value())
         self.output_v_g_values = self.read_output_v_g_spinboxes()
+        
+        if self.interrupt_measurement_called:
+            self.interrupt_measurement_called  = False
+        
         print(self.output_v_g_values)
         for v_g_value in self.output_v_g_values:
+            
             GeneralCurveMeasure.pre_run(self)
             self.ui.v_g_doubleSpinBox.setValue(v_g_value)
             self.v_constant = self.settings['V_G'] = v_g_value
@@ -136,7 +135,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
             GeneralCurveMeasure.post_run(self)
             self.sweep_device.source_V(self.v_sweep_start)
             time.sleep(self.preread_delay * .001)
-            self.source_voltage = self.v_sweep_start - self.v_sweep_step_size
+            self.source_voltage = self.v_sweep_start
             self.READ_NUMBER += 1
         self.READ_NUMBER = 1 #reset file numbering
         self.switch_setting() #configure variables for transfer curve again
@@ -192,6 +191,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
 
         self.output_preread = self.preread_delay # for config file
         self.output_first_bias_settle = self.first_bias_settle
+
 
     def read_output_v_g_spinboxes(self):
         output_v_g_values = np.zeros(self.num_output_curves)
