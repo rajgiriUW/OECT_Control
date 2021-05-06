@@ -7,6 +7,7 @@ import numpy as np
 import time
 import os.path
 import configparser
+import serial
 
 from general_curve_measure import GeneralCurveMeasure
 from output_curve_measure import OutputCurveMeasure
@@ -20,6 +21,8 @@ class TestDeviceMeasure(GeneralCurveMeasure):
 
     #class variable determining numbering of measurement output file. useful in auto_measure for multiple transfers and outputs
     READ_NUMBER = 1
+    
+    COM = 'COM6' # USB relay
 
     def switch_setting(self):
         '''
@@ -43,10 +46,20 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         #create automeasure specific settings
         self.dimension_choice = {'4000 x 20': [4000, 20], '2000 x 20': [2000, 20], '1000 x 20': [1000, 20], '800 x 20': [800, 20],
             '400 x 20': [400, 20], '200 x 20': [200, 20], '100 x 20': [100, 20]}
+        # Assumes device faces 4000 um pixel top-right
+        self.pixels = {'800': 2,
+                       '2000': 4,
+                       '200': 8,
+                       '100': 16,
+                       '400': 32,
+                       '1000': 64,
+                       '4000': 128}
+        
         self.settings.New('number_of_transfer_curves', int, initial = 1, vmin = 1)
         self.settings.New('number_of_output_curves', int, initial = 1, vmin = 1, vmax = 5)
         self.settings.New('dimension', str, choices = self.dimension_choice.keys(), initial = '4000 x 20')
         self.settings.New('thickness', unit = "nm", initial = 50)
+        self.settings.New('pixel', str, choices = self.pixels.keys(), initial = '4000')
         self.v_g_spinboxes = self.ui.v_g_groupBox.findChildren(QtGui.QDoubleSpinBox) #array of v_g spinboxes
 
     def setup_figure(self):
@@ -62,6 +75,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.connect_output_ui_to_settings()
         self.settings.dimension.connect_to_widget(self.ui.dimension_comboBox)
         self.settings.thickness.connect_to_widget(self.ui.thickness_doubleSpinBox)
+        self.settings.pixel.connect_to_widget(self.ui.pixel_comboBox)
 
         # # Set up pyqtgraph graph_layout in the UI
         self.graph_layout = pg.GraphicsLayoutWidget(title = 'Test Device graphs', show = True)
@@ -103,6 +117,21 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.thickness = self.settings['thickness'] = self.ui.thickness_doubleSpinBox.value()
         self.ds_plot.setLabel('bottom', 'V_G')
         self.g_plot.setLabel('bottom', 'V_G')
+        
+        # Open the correct Relay port
+        # The command is always b'\xFF\x00' and then the last byte is related to the port
+        # 1=port 1, 2 =port 2, 4=port 3, 8 = port 4, etc
+        try:
+            self.serial_device = serial.Serial(self.COM)
+            cmd = bytearray(b'')
+            cmd.append(255)
+            cmd.append(0)
+            cmd.append(self.pixels[self.settings['pixel']])
+            print(cmd)
+            self.serial_device.write(cmd)
+        except:
+            print('Using manual mode, not USB relay')
+        
 
     def run(self):
         self.read_settings = self.transfer_read_from_settings #overrides general_curve read_settings
@@ -144,6 +173,16 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         if self.SWEEP == "DS": self.switch_setting() #
         self.READ_NUMBER = 1
         self.make_config()
+
+        try:
+            cmd = bytearray(b'')
+            cmd.append(255)
+            cmd.append(0)
+            cmd.append(0)
+            self.serial_device.write(cmd)
+            self.serial_device.close()
+        except:
+            pass
 
     def transfer_read_from_settings(self):
         self.constant_current_compliance = self.constant_hw.settings['current_compliance'] = self.ui.current_compliance_ds_output_doubleSpinBox.value()
@@ -232,8 +271,17 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         config = configparser.ConfigParser()
         config.optionxform = str
     
-        config['Dimensions'] = {'Width (um)': self.dimension_choice[self.dimension][0], 
-                                'Length (um)': self.dimension_choice[self.dimension][1]}
+        # For old versions of the panel that use manual Dimensions
+        try:
+            config['Dimensions'] = {'Width (um)':  self.settings['pixel'], 
+                                    'Length (um)': self.dimension_choice[self.dimension][1],
+                                    'Thickness (nm)' : self.thickness}
+        except:
+            config['Dimensions'] = {'Width (um)': self.dimension_choice[self.dimension][0], 
+                                    'Length (um)': self.dimension_choice[self.dimension][1],
+                                    'Thickness (nm)' : self.thickness}
+        
+
         config['Transfer'] = {'Preread (ms)': self.transfer_preread,
                               'First Bias (ms)': self.transfer_first_bias_settle,
                               'Vds (V)': self.transfer_vds}

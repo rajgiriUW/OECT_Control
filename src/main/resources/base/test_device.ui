@@ -835,7 +835,14 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
+   <item row="5" column="1">
+    <widget class="QPushButton" name="interrupt_pushButton">
+     <property name="text">
+      <string>Interrupt</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
     <widget class="QFrame" name="frame_2">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -843,78 +850,151 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QGridLayout" name="gridLayout_6">
-      <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="thickness_doubleSpinBox">
-        <property name="maximum">
-         <double>1000.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>50.000000000000000</double>
-        </property>
-       </widget>
+     <widget class="QDoubleSpinBox" name="thickness_doubleSpinBox">
+      <property name="geometry">
+       <rect>
+        <x>340</x>
+        <y>50</y>
+        <width>65</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <double>1000.000000000000000</double>
+      </property>
+      <property name="value">
+       <double>50.000000000000000</double>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_15">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>50</y>
+        <width>121</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Dimension (manual mode)</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_19">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>20</y>
+        <width>71</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Thickness (um)</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="dimension_comboBox">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>50</y>
+        <width>74</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>4000 x 20</string>
+       </property>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_15">
-        <property name="text">
-         <string>Dimension</string>
-        </property>
-       </widget>
+      <item>
+       <property name="text">
+        <string>2000 x 20</string>
+       </property>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_19">
-        <property name="text">
-         <string>Thickness (um)</string>
-        </property>
-       </widget>
+      <item>
+       <property name="text">
+        <string>1000 x 20</string>
+       </property>
       </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="dimension_comboBox">
-        <item>
-         <property name="text">
-          <string>4000 x 20</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>2000 x 20</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1000 x 20</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>800 x 20</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>400 x 20</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>200 x 20</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>100 x 20</string>
-         </property>
-        </item>
-       </widget>
+      <item>
+       <property name="text">
+        <string>800 x 20</string>
+       </property>
       </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="5" column="1">
-    <widget class="QPushButton" name="interrupt_pushButton">
-     <property name="text">
-      <string>Interrupt</string>
-     </property>
+      <item>
+       <property name="text">
+        <string>400 x 20</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>200 x 20</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>100 x 20</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QComboBox" name="pixel_comboBox">
+      <property name="geometry">
+       <rect>
+        <x>180</x>
+        <y>20</y>
+        <width>101</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>800</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>2000</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>200</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>100</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>400</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>1000</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>4000</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="label_20">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>141</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Dimension (with relay (um))</string>
+      </property>
+     </widget>
     </widget>
    </item>
   </layout>
