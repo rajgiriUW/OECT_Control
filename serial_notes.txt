@@ -1,0 +1,16 @@
+pySerial 
+s = serial.Serial('COMxx')
+s.read()
+s.write(b'xFF\x00\x01') # FF = device on, x01 = doesn't matter, x01 = pixel 1 on
+
+the x01 corresponds to the relay pixel to turn on
+01= 1
+02 = 2
+04 = 3
+08 = 4
+10 = 5
+20 = 6
+40 = 7
+80 = 8
+
+the "\x" is a unicode flag and the b'' in front means it's reading as bytes. So it's sending actual byte-strings to the USB relay
