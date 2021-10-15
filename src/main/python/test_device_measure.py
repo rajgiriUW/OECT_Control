@@ -13,6 +13,8 @@ from general_curve_measure import GeneralCurveMeasure
 from output_curve_measure import OutputCurveMeasure
 from transfer_curve_measure import TransferCurveMeasure
 
+from relay_ft245r import FT245R
+
 class TestDeviceMeasure(GeneralCurveMeasure):
     #class variables determining vhich device's voltage will go through a sweep and which will be constant
     #these are the initial values since transfer curve will be set up first
@@ -22,8 +24,9 @@ class TestDeviceMeasure(GeneralCurveMeasure):
     #class variable determining numbering of measurement output file. useful in auto_measure for multiple transfers and outputs
     READ_NUMBER = 1
     
-    COM = 'COM6' # USB relay
-
+    SOURCECOM = 'COM6' # USB relay, front
+    DRAINCOM = 'COM3' #USB Relay, back
+    
     def switch_setting(self):
         '''
         Switch class variables and sweep/constant hardware references. Used for going between handling transfer and output measurements.
@@ -47,21 +50,48 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.dimension_choice = {'4000 x 20': [4000, 20], '2000 x 20': [2000, 20], '1000 x 20': [1000, 20], '800 x 20': [800, 20],
             '400 x 20': [400, 20], '200 x 20': [200, 20], '100 x 20': [100, 20]}
         # Assumes device faces 4000 um pixel top-right
-        self.pixels = {'800': 2,
-                       '2000': 4,
-                       '200': 8,
-                       '100': 16,
-                       '400': 32,
-                       '1000': 64,
-                       '4000': 128}
+        
+        self.pixels = {'2: 800': 2,
+                       '3: 2000': 3,
+                       '4: 200': 4,
+                       '5: 100': 5,
+                       '6: 400': 6,
+                       '7: 1000': 7,
+                       '8: 4000': 8}
+        
         
         self.settings.New('number_of_transfer_curves', int, initial = 1, vmin = 1)
         self.settings.New('number_of_output_curves', int, initial = 1, vmin = 1, vmax = 5)
         self.settings.New('dimension', str, choices = self.dimension_choice.keys(), initial = '4000 x 20')
         self.settings.New('thickness', unit = "nm", initial = 50)
-        self.settings.New('pixel', str, choices = self.pixels.keys(), initial = '4000')
+        self.settings.New('pixel', str, choices = self.pixels.keys(), initial = '2: 800')
         self.v_g_spinboxes = self.ui.v_g_groupBox.findChildren(QtGui.QDoubleSpinBox) #array of v_g spinboxes
-
+        self.ui.radioButton_relay.toggled.connect(self.use_relay)
+        self.ui.radioButton_manual.toggled.connect(self.use_relay)
+        
+        # Connect the relay
+        try:
+            self.relay_d = FT245R()
+            self.relay_s = FT245R()
+            drain = self.relay_d.list_dev()[0]
+            source = self.relay_s.list_dev()[1]
+            
+            self.relay_d.connect(drain)
+            self.relay_s.connect(source)
+            self.relay_exists = True
+            
+        except:
+            print('No relay board connected!')
+            self.relay_exists = False
+   
+    def use_relay(self):
+        """Check if using the relay or doing manually"""
+        self.use_relay = self.ui.radioButton_relay.isChecked()==True
+        
+        # Safety check so you can't try to run the relay 
+        if self.relay_exists == False:
+            self.use_relay = False
+        
     def setup_figure(self):
         '''
         UI event handling.
@@ -121,17 +151,22 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         # Open the correct Relay port
         # The command is always b'\xFF\x00' and then the last byte is related to the port
         # 1=port 1, 2 =port 2, 4=port 3, 8 = port 4, etc
-        try:
-            self.serial_device = serial.Serial(self.COM)
-            cmd = bytearray(b'')
-            cmd.append(255)
-            cmd.append(0)
-            cmd.append(self.pixels[self.settings['pixel']])
-            print(cmd)
-            self.serial_device.write(cmd)
-        except:
-            print('Using manual mode, not USB relay')
-        
+#        try:
+#            self.serial_device = serial.Serial(self.DRAINCOM)
+#            cmd = bytearray(b'')
+#            cmd.append(255)
+#            cmd.append(0)
+#            cmd.append(self.pixels[self.settings['pixel']])
+#            print(cmd)
+#            self.serial_device.write(cmd)
+#        except:
+#            print('Using manual mode, not USB relay')
+
+        if self.relay_exists and self.use_relay:
+            
+            self.relay_d.switchon(self.pixels[self.settings['pixel']])
+            self.relay_s.switchon(self.pixels[self.settings['pixel']])
+
 
     def run(self):
         self.read_settings = self.transfer_read_from_settings #overrides general_curve read_settings
@@ -154,18 +189,21 @@ class TestDeviceMeasure(GeneralCurveMeasure):
             self.interrupt_measurement_called  = False
         
         print(self.output_v_g_values)
+        _v_g_restore = self.output_v_g_values[0]
         for v_g_value in self.output_v_g_values:
             
             GeneralCurveMeasure.pre_run(self)
             self.ui.v_g_doubleSpinBox.setValue(v_g_value)
             self.v_constant = self.settings['V_G'] = v_g_value
             self.constant_device.source_V(self.v_constant)
+            
             GeneralCurveMeasure.run(self)
             GeneralCurveMeasure.post_run(self)
             self.sweep_device.source_V(self.v_sweep_start)
             time.sleep(self.preread_delay * .001)
             self.source_voltage = self.v_sweep_start
             self.READ_NUMBER += 1
+        self.settings['V_G'] = _v_g_restore
         self.READ_NUMBER = 1 #reset file numbering
         self.switch_setting() #configure variables for transfer curve again
 
@@ -174,15 +212,22 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.READ_NUMBER = 1
         self.make_config()
 
-        try:
-            cmd = bytearray(b'')
-            cmd.append(255)
-            cmd.append(0)
-            cmd.append(0)
-            self.serial_device.write(cmd)
-            self.serial_device.close()
-        except:
-            pass
+#        try:
+#            cmd = bytearray(b'')
+#            cmd.append(255)
+#            cmd.append(0)
+#            cmd.append(0)
+#            self.serial_device.write(cmd)
+#            self.serial_device.close()
+#        except:
+#            pass
+        if self.relay_exists and self.use_relay:
+            
+            self.relay_d.switchoff(self.pixels[self.settings['pixel']])
+            self.relay_s.switchoff(self.pixels[self.settings['pixel']])
+
+        #self.relay_d.disconnect()
+        #self.relay_s.disconnect()
 
     def transfer_read_from_settings(self):
         self.constant_current_compliance = self.constant_hw.settings['current_compliance'] = self.ui.current_compliance_ds_output_doubleSpinBox.value()
