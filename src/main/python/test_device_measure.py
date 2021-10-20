@@ -83,7 +83,73 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         except:
             print('No relay board connected!')
             self.relay_exists = False
+            
+        # Set up the manual relay panel
+        self.drain_boxes = [self.ui.checkBox_D1,
+                            self.ui.checkBox_D2,
+                            self.ui.checkBox_D3,
+                            self.ui.checkBox_D4,
+                            self.ui.checkBox_D5,
+                            self.ui.checkBox_D6,
+                            self.ui.checkBox_D7,
+                            self.ui.checkBox_D8]
    
+        self.source_boxes = [self.ui.checkBox_S1,
+                             self.ui.checkBox_S2,
+                             self.ui.checkBox_S3,
+                             self.ui.checkBox_S4,
+                             self.ui.checkBox_S5,
+                             self.ui.checkBox_S6,
+                             self.ui.checkBox_S7,
+                             self.ui.checkBox_S8]       
+    
+        self.ui.setRelaysButton.clicked.connect(self.set_relay)
+        self.ui.resetRelaysButton.clicked.connect(self.reset_relay)
+        
+        self.reset_relay()
+    
+    def set_relay(self):
+        """Sets the relay to the manual positions checked """
+        if self.relay_exists:
+            
+            for n, d in enumerate(self.drain_boxes, 1):
+            
+                if d.isChecked() == True:
+                    self.relay_d.switchon(n)
+                    d.setStyleSheet("font-weight: bold; color: green")
+                else:
+                    self.relay_d.switchoff(n)
+                    d.setStyleSheet("font-weight: normal; color: black")
+                    
+            for n, s in enumerate(self.source_boxes, 1):
+                
+                if s.isChecked() == True:
+                    self.relay_s.switchon(n)
+                    s.setStyleSheet("font-weight: bold; color: green")
+                else:
+                    self.relay_s.switchoff(n)
+                    s.setStyleSheet("font-weight: normal; color: black")
+                        
+        return
+
+    def reset_relay(self):
+        """Turns all connections on both relays off """
+        if self.relay_exists:
+            
+            for n, d in enumerate(self.drain_boxes, 1):
+                
+                d.setChecked(False)
+                self.relay_d.switchoff(n)
+                d.setStyleSheet("font-weight: normal; color: black")
+                    
+            for n, s in enumerate(self.source_boxes, 1):
+                
+                s.setChecked(False)
+                self.relay_s.switchoff(n)
+                s.setStyleSheet("font-weight: normal; color: black")
+                        
+        return
+    
     def use_relay(self):
         """Check if using the relay or doing manually"""
         self.use_relay = self.ui.radioButton_relay.isChecked()==True
@@ -164,8 +230,15 @@ class TestDeviceMeasure(GeneralCurveMeasure):
 
         if self.relay_exists and self.use_relay:
             
-            self.relay_d.switchon(self.pixels[self.settings['pixel']])
-            self.relay_s.switchon(self.pixels[self.settings['pixel']])
+            #self.relay_d.switchon(self.pixels[self.settings['pixel']])
+            #self.relay_s.switchon(self.pixels[self.settings['pixel']])
+            
+            self.reset_relay()
+            
+            self.drain_boxes[self.pixels[self.settings['pixel']] - 1].setChecked(True)
+            self.source_boxes[self.pixels[self.settings['pixel']] - 1].setChecked(True)
+            
+            self.set_relay()
 
 
     def run(self):
@@ -223,8 +296,13 @@ class TestDeviceMeasure(GeneralCurveMeasure):
 #            pass
         if self.relay_exists and self.use_relay:
             
-            self.relay_d.switchoff(self.pixels[self.settings['pixel']])
-            self.relay_s.switchoff(self.pixels[self.settings['pixel']])
+            #self.relay_d.switchoff(self.pixels[self.settings['pixel']])
+            #self.relay_s.switchoff(self.pixels[self.settings['pixel']])
+            
+            self.drain_boxes[self.pixels[self.settings['pixel']]].setChecked(False)
+            self.source_boxes[self.pixels[self.settings['pixel']]].setChecked(False)
+            
+            self.reset_relay()
 
         #self.relay_d.disconnect()
         #self.relay_s.disconnect()
