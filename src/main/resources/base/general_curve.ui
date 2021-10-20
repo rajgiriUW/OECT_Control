@@ -238,10 +238,24 @@
            </property>
           </widget>
          </item>
-         <item row="6" column="2">
+         <item row="6" column="3">
           <widget class="QPushButton" name="interrupt_pushButton">
            <property name="text">
             <string>Interrupt</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QPushButton" name="setRelaysGenCurveButton">
+           <property name="text">
+            <string>Set Relays</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="2">
+          <widget class="QPushButton" name="resetRelaysGenCurveButton">
+           <property name="text">
+            <string>Reset Relays</string>
            </property>
           </widget>
          </item>
@@ -453,7 +467,6 @@
   <tabstop>dimension_comboBox</tabstop>
   <tabstop>thickness_doubleSpinBox</tabstop>
   <tabstop>start_pushButton</tabstop>
-  <tabstop>interrupt_pushButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>

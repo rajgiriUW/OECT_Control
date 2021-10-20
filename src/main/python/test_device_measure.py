@@ -36,7 +36,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
             self.sweep_hw, self.constant_hw = self.constant_hw, self.sweep_hw 
 
     def setup(self):
-        self.name = "TestDevice"
+        self.name = "TestDevice + Relay"
         self.ui_filename = self.app.appctxt.get_resource("test_device.ui")
 
         #Load ui file and convert it to a live QWidget of the user interface
@@ -47,10 +47,15 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.switch_setting() #configure variables for transfer curve
 
         #create automeasure specific settings
-        self.dimension_choice = {'4000 x 20': [4000, 20], '2000 x 20': [2000, 20], '1000 x 20': [1000, 20], '800 x 20': [800, 20],
-            '400 x 20': [400, 20], '200 x 20': [200, 20], '100 x 20': [100, 20]}
-        # Assumes device faces 4000 um pixel top-right
+        self.dimension_choice = {'4000 x 20': [4000, 20], 
+                                 '2000 x 20': [2000, 20], 
+                                 '1000 x 20': [1000, 20], 
+                                 '800 x 20': [800, 20],
+                                 '400 x 20': [400, 20], 
+                                 '200 x 20': [200, 20], 
+                                 '100 x 20': [100, 20]}
         
+        # Assumes device faces 4000 um pixel top-right
         self.pixels = {'2: 800': 2,
                        '3: 2000': 3,
                        '4: 200': 4,
@@ -58,7 +63,6 @@ class TestDeviceMeasure(GeneralCurveMeasure):
                        '6: 400': 6,
                        '7: 1000': 7,
                        '8: 4000': 8}
-        
         
         self.settings.New('number_of_transfer_curves', int, initial = 1, vmin = 1)
         self.settings.New('number_of_output_curves', int, initial = 1, vmin = 1, vmax = 5)
@@ -70,20 +74,22 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.ui.radioButton_manual.toggled.connect(self.use_relay)
         
         # Connect the relay
-        try:
-            self.relay_d = FT245R()
-            self.relay_s = FT245R()
-            drain = self.relay_d.list_dev()[0]
-            source = self.relay_s.list_dev()[1]
-            
-            self.relay_d.connect(drain)
-            self.relay_s.connect(source)
-            self.relay_exists = True
-            
-        except:
-            print('No relay board connected!')
-            self.relay_exists = False
-            
+#        try:
+#            self.relay_d = FT245R()
+#            self.relay_s = FT245R()
+#            drain = self.relay_d.list_dev()[0]
+#            source = self.relay_s.list_dev()[1]
+#            
+#            self.relay_d.connect(drain)
+#            self.relay_s.connect(source)
+#            self.relay_exists = True
+#            
+#        except:
+#            print('No relay board connected!')
+#            self.relay_exists = False
+        
+        GeneralCurveMeasure.setup_relay(self)
+        
         # Set up the manual relay panel
         self.drain_boxes = [self.ui.checkBox_D1,
                             self.ui.checkBox_D2,

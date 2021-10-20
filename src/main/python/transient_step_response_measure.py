@@ -20,7 +20,7 @@ class TransientStepResponseMeasure(Measurement):
         # This file can be edited graphically with Qt Creator
         # sibling_path function allows python to find a file in the same folder
         # as this python module
-        self.name = "TransientStepResponse"
+        self.name = "Transient Step Response"
         
         #Load ui file and convert it to a live QWidget of the user interface
         self.ui_filename = self.app.appctxt.get_resource("transient_step_response.ui")
