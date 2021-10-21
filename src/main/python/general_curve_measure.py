@@ -6,6 +6,7 @@ from PyQt5 import *
 import numpy as np
 import time
 import os.path
+from relay_ft245r import FT245R
 
 class GeneralCurveMeasure(Measurement):
     #class variables determining vhich device's voltage will go through a sweep and which will be constant
@@ -27,8 +28,8 @@ class GeneralCurveMeasure(Measurement):
         # This file can be edited graphically with Qt Creator
         # sibling_path function allows python to find a file in the same folder
         # as this python module
-        if self.SWEEP == "DS": self.name = "output_curve_measure"
-        elif self.SWEEP == "G": self.name = "transfer_curve_measure"
+        if self.SWEEP == "DS": self.name = "Output Curve"
+        elif self.SWEEP == "G": self.name = "Transfer Curve"
         # self.ui_filename = sibling_path(__file__, "general_curve.ui")
         self.ui_filename = self.app.appctxt.get_resource("general_curve.ui")
         
@@ -41,6 +42,64 @@ class GeneralCurveMeasure(Measurement):
         self.settings.New('dimension', str, choices = self.dimension_choice.keys(), initial = '4000 x 20')
         self.settings.New('thickness', unit = "nm", initial = 50)
         self.settings.New('num_cycles', int, initial=1)
+        
+        self.ui.setRelaysGenCurveButton.clicked.connect(self.set_relay)
+        self.ui.resetRelaysGenCurveButton.clicked.connect(self.reset_relay)
+        
+        self.pixels = {'800 x 20': 2,
+                       '2000 x 20': 3,
+                       '200 x 20': 4,
+                       '100 x 20': 5,
+                       '400 x 20': 6,
+                       '1000 x 20': 7,
+                       '4000 x 20': 8}
+
+        self.setup_relay()
+
+    def setup_relay(self):
+        
+        # Connect the relay
+        try:
+            self.relay_d = FT245R()
+            self.relay_s = FT245R()
+            drain = self.relay_d.list_dev()[0]
+            source = self.relay_s.list_dev()[1]
+            
+            self.relay_d.connect(drain)
+            self.relay_s.connect(source)
+            self.relay_exists = True
+            
+        except:
+            print('No relay board connected!')
+            self.relay_exists = False
+        
+
+    def set_relay(self):
+        """Mostly a copy of the Test_device_measure function to set the relays
+        You should set them manually if you want to be sure"""
+        _dimension = self.pixels[self.settings['dimension']]
+        print(_dimension)
+        for k, v in self.pixels.items():
+            if k == _dimension:
+                self.relay_d.switchon(v)
+                self.relay_s.switchon(v)
+            else:
+                self.relay_d.switchoff(v)
+                self.relay_s.switchoff(v)
+        
+
+    def reset_relay(self):
+        """Sets the relays to all be off"""
+        
+        
+        for k, v in self.pixels.items():
+            
+            self.relay_d.switchoff(v)
+            self.relay_s.switchoff(v)
+            
+        # To error check for EIS relay accidentally open
+        self.relay_d.switchoff(1)
+        self.relay_s.switchoff(1)
 
     def create_settings(self):
                 # Measurement Specific Settings
@@ -188,6 +247,20 @@ class GeneralCurveMeasure(Measurement):
         self.g_device.reset()
         self.ds_device.reset()
         self.read_settings()
+
+        # Check the relay
+#        if TestDeviceMeasure.relay_exists and self.use_relay:
+#            
+#            #self.relay_d.switchon(self.pixels[self.settings['pixel']])
+#            #self.relay_s.switchon(self.pixels[self.settings['pixel']])
+#            
+#            self.reset_relay()
+#            
+#            self.drain_boxes[self.pixels[self.settings['pixel']] - 1].setChecked(True)
+#            self.source_boxes[self.pixels[self.settings['pixel']] - 1].setChecked(True)
+#            
+#            self.set_relay()
+
 
         #configure keithleys
         self.constant_device.write_current_compliance(self.constant_current_compliance)
