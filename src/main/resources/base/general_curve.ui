@@ -247,6 +247,11 @@
          </item>
          <item row="6" column="1">
           <widget class="QPushButton" name="setRelaysGenCurveButton">
+           <property name="font">
+            <font>
+             <strikeout>true</strikeout>
+            </font>
+           </property>
            <property name="text">
             <string>Set Relays</string>
            </property>
@@ -254,6 +259,11 @@
          </item>
          <item row="6" column="2">
           <widget class="QPushButton" name="resetRelaysGenCurveButton">
+           <property name="font">
+            <font>
+             <strikeout>true</strikeout>
+            </font>
+           </property>
            <property name="text">
             <string>Reset Relays</string>
            </property>
