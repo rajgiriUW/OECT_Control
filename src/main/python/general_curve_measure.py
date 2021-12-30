@@ -37,22 +37,22 @@ class GeneralCurveMeasure(Measurement):
         self.ui = load_qt_ui_file(self.ui_filename)
 
         self.create_settings()
-        self.dimension_choice = {'4000 x 20': [4000, 20], '2000 x 20': [2000, 20], '1000 x 20': [1000, 20], '800 x 20': [800, 20], 
-            '400 x 20': [400, 20], '200 x 20': [200, 20], '100 x 20': [100, 20]}
-        self.settings.New('dimension', str, choices = self.dimension_choice.keys(), initial = '4000 x 20')
+        self.dimension_choice = {'4000 x 10': [4000, 10], '2000 x 10': [2000, 10], '1000 x 10': [1000, 10], '800 x 10': [800, 10], 
+            '400 x 10': [400, 10], '200 x 10': [200, 10], '100 x 10': [100, 10]}
+        self.settings.New('dimension', str, choices = self.dimension_choice.keys(), initial = '4000 x 10')
         self.settings.New('thickness', unit = "nm", initial = 50)
         self.settings.New('num_cycles', int, initial=1)
         
         self.ui.setRelaysGenCurveButton.clicked.connect(self.set_relay)
         self.ui.resetRelaysGenCurveButton.clicked.connect(self.reset_relay)
         
-        self.pixels = {'800 x 20': 2,
-                       '2000 x 20': 3,
-                       '200 x 20': 4,
-                       '100 x 20': 5,
-                       '400 x 20': 6,
-                       '1000 x 20': 7,
-                       '4000 x 20': 8}
+        self.pixels = {'800 x 10': 2,
+                       '2000 x 10': 3,
+                       '200 x 10': 4,
+                       '100 x 10': 5,
+                       '400 x 10': 6,
+                       '1000 x 10': 7,
+                       '4000 x 10': 8}
 
         self.setup_relay()
 
@@ -276,6 +276,15 @@ class GeneralCurveMeasure(Measurement):
             self.constant_device.measure_current()
         
         self.num_steps = np.abs(int(np.ceil(((self.v_sweep_finish - self.v_sweep_start)/self.v_sweep_step_size)))) + 1 #add 1 to account for start voltage
+        
+        # Logic for voltages is that the start and end determine the range and step size polarity is corrected
+        # for that range. e.g. a step size of 0.1 V will flip automatically to -0.1 V if start_v < stop_v
+        
+        if np.sign(self.v_sweep_start - self.v_sweep_finish) ==  np.sign(self.v_sweep_step_size):
+            
+            self.settings['V_%s_step_size' % self.SWEEP] *= -1
+            self.v_sweep_step_size = self.settings['V_%s_step_size' % self.SWEEP]
+        
         self.voltages = np.arange(start = self.v_sweep_start, 
                                   stop = self.v_sweep_finish + self.v_sweep_step_size, 
                                   step = self.v_sweep_step_size) #add an extra step to stop since arange is exclusive
@@ -284,8 +293,10 @@ class GeneralCurveMeasure(Measurement):
             self.reverse_voltages = np.arange(start = self.v_sweep_finish - self.v_sweep_step_size, stop = self.v_sweep_start - (self.v_sweep_step_size/2), step = -self.v_sweep_step_size) #step size divided by two then subtracted to ensure correct stop point
             self.voltages = np.concatenate((self.voltages, self.reverse_voltages))
             self.save_array = np.zeros(shape=(self.voltages.shape[0], 5))
+            
         else:
             self.save_array = np.zeros(shape=(self.voltages.shape[0], 5))
+            
         self.save_array[:,0] = self.voltages
         #prepare hardware for read
         self.sweep_device.write_output_on()

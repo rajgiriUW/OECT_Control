@@ -82,8 +82,11 @@ class TransientStepResponseMeasure(Measurement):
         self.plot.setLabel('left', 'I_DS')
         
     def update_display(self):
-        self.plot.plot(self.time_array[:self.counts], 
-                       self.save_array[:self.counts,2], pen = 'r', clear = True)
+        
+        self.plot.plot(self.save_array[:self.counts, 0], 
+                       self.save_array[:self.counts, 2], pen='r', clear=True)
+        
+        #self.plot.plot(self.time_array[:self.counts], self.save_array[:self.counts,2], pen = 'r', clear = True)
 
     def read_settings(self):
         '''

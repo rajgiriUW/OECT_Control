@@ -47,13 +47,13 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         self.switch_setting() #configure variables for transfer curve
 
         #create automeasure specific settings
-        self.dimension_choice = {'4000 x 20': [4000, 20], 
-                                 '2000 x 20': [2000, 20], 
-                                 '1000 x 20': [1000, 20], 
-                                 '800 x 20': [800, 20],
-                                 '400 x 20': [400, 20], 
-                                 '200 x 20': [200, 20], 
-                                 '100 x 20': [100, 20]}
+        self.dimension_choice = {'4000 x 10': [4000, 10], 
+                                 '2000 x 10': [2000, 10], 
+                                 '1000 x 10': [1000, 10], 
+                                 '800 x 10': [800, 10],
+                                 '400 x 10': [400, 10], 
+                                 '200 x 10': [200, 10], 
+                                 '100 x 10': [100, 10]}
         
         # Assumes device faces 4000 um pixel top-right
         self.pixels = {'2: 800': 2,
@@ -66,7 +66,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         
         self.settings.New('number_of_transfer_curves', int, initial = 1, vmin = 1)
         self.settings.New('number_of_output_curves', int, initial = 1, vmin = 1, vmax = 5)
-        self.settings.New('dimension', str, choices = self.dimension_choice.keys(), initial = '4000 x 20')
+        self.settings.New('dimension', str, choices = self.dimension_choice.keys(), initial = '4000 x 10')
         self.settings.New('thickness', unit = "nm", initial = 50)
         self.settings.New('pixel', str, choices = self.pixels.keys(), initial = '2: 800')
         self.v_g_spinboxes = self.ui.v_g_groupBox.findChildren(QtGui.QDoubleSpinBox) #array of v_g spinboxes
@@ -402,7 +402,7 @@ class TestDeviceMeasure(GeneralCurveMeasure):
     
         # For old versions of the panel that use manual Dimensions
         try:
-            config['Dimensions'] = {'Width (um)':  self.settings['pixel'], 
+            config['Dimensions'] = {'Width (um)':  self.settings['pixel'].split(' ')[-1], 
                                     'Length (um)': self.dimension_choice[self.dimension][1],
                                     'Thickness (nm)' : self.thickness}
         except:

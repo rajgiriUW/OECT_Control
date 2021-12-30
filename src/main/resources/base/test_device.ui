@@ -998,12 +998,12 @@
         <rect>
          <x>10</x>
          <y>0</y>
-         <width>82</width>
+         <width>101</width>
          <height>17</height>
         </rect>
        </property>
        <property name="text">
-        <string>Use Relay</string>
+        <string>Auto-set Relay</string>
        </property>
        <property name="checked">
         <bool>true</bool>
