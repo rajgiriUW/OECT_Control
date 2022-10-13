@@ -15,7 +15,10 @@ Python Implementation for Organic Electrochemical Transistor Measurement
 - pyusb
 
 ## How to Use
-From releases: download the .zip file and run "OECT_Control.exe", or download the .exe installer. 
+
+**Note:** For now, the .EXE files in releases do not work. We are trying to debug. In the meantime, you can run from FBS by cloning the source and following the instructions further below.
+
+From releases: download the .zip file and run "OECT_Control.exe", or download the .exe installer.
 If you used the installer to install the application, the application must be run as administrator. Otherwise, a Permission Error will occur.
 
 **Note:** that this control also uses two FT245R relay boards to power the source and drain connections. Please follow the instructions for using "Zadig" found at this site: https://github.com/vpatron/relay_ft245r
@@ -50,6 +53,10 @@ pip install -r requirements/base.txt
 3. To test the app, run
 ```
 fbs run
+```
+To save time, you can create a Anaconda Prompt shortcut and change "target" to (replace "Path\To" with the actual path) and replace "Start In" with whatever directory you have cloned this code to.
+```
+%windir%\System32\cmd.exe "/K" C:\Path\To\Anaconda3\Scripts\activate.bat C:\Path\To\Anaconda3\ && fbs run
 ```
 
 ### Important notes about making changes to the application
