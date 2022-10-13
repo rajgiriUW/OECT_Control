@@ -12,10 +12,13 @@ Python Implementation for Organic Electrochemical Transistor Measurement
 - qtconsole
 - ipython
 - fbs
+- pyusb
 
 ## How to Use
 From releases: download the .zip file and run "OECT_Control.exe", or download the .exe installer. 
 If you used the installer to install the application, the application must be run as administrator. Otherwise, a Permission Error will occur.
+
+**Note:** that this control also uses two FT245R relay boards to power the source and drain connections. Please follow the instructions for using "Zadig" found at this site: https://github.com/vpatron/relay_ft245r
 
 ## Directly running the app with FBS and making changes
 Refer to https://build-system.fman.io/manual/ for more info. 
