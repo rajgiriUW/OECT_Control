@@ -1,7 +1,7 @@
 pySerial 
 s = serial.Serial('COMxx')
 s.read()
-s.write(b'xFF\x00\x01') # FF = device on, x01 = doesn't matter, x01 = pixel 1 on
+s.write(b'xFF\x00\x01') # FF = device on, x00 = doesn't matter, x01 = pixel 1 on
 
 the x01 corresponds to the relay pixel to turn on
 01= 1

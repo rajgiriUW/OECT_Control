@@ -245,7 +245,8 @@ class TestDeviceMeasure(GeneralCurveMeasure):
             self.source_boxes[self.pixels[self.settings['pixel']] - 1].setChecked(True)
             
             self.set_relay()
-
+                
+            self.dimension = self.settings['pixel'].split(' ')[-1] + ' x 10'
 
     def run(self):
         self.read_settings = self.transfer_read_from_settings #overrides general_curve read_settings
@@ -401,15 +402,18 @@ class TestDeviceMeasure(GeneralCurveMeasure):
         config.optionxform = str
     
         # For old versions of the panel that use manual Dimensions
-        try:
-            config['Dimensions'] = {'Width (um)':  self.settings['pixel'].split(' ')[-1], 
-                                    'Length (um)': self.dimension_choice[self.dimension][1],
-                                    'Thickness (nm)' : self.thickness}
-        except:
-            config['Dimensions'] = {'Width (um)': self.dimension_choice[self.dimension][0], 
-                                    'Length (um)': self.dimension_choice[self.dimension][1],
-                                    'Thickness (nm)' : self.thickness}
-        
+#        try:
+#            config['Dimensions'] = {'Width (um)':  self.settings['pixel'].split(' ')[-1], 
+#                                    'Length (um)': self.dimension_choice[self.dimension][1],
+#                                    'Thickness (nm)' : self.thickness}
+#        except:
+#            print('Error', self.settings['pixel'])
+#            config['Dimensions'] = {'Width (um)': self.dimension_choice[self.dimension][0], 
+#                                    'Length (um)': self.dimension_choice[self.dimension][1],
+#                                    'Thickness (nm)' : self.thickness}
+        config['Dimensions'] = {'Width (um)': self.dimension_choice[self.dimension][0],
+                                'Length (um)': self.dimension_choice[self.dimension][1],
+                                'Thickness (nm)' : self.thickness}
 
         config['Transfer'] = {'Preread (ms)': self.transfer_preread,
                               'First Bias (ms)': self.transfer_first_bias_settle,
