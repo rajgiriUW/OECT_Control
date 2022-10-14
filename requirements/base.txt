@@ -29,7 +29,7 @@ python-dateutil==2.8.1
 pytz==2020.1
 pyusb==1.2.1
 PyVISA==1.10.1
-pywin32==228
+pywin32==301
 pywin32-ctypes==0.2.0
 pyzmq==19.0.1
 qtconsole==4.7.5
