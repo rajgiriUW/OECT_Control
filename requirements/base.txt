@@ -7,7 +7,7 @@ fbs==0.8.8
 future==0.18.2
 h5py==2.10.0
 ipykernel==5.3.4
-ipython==7.16.1
+ipython==8.10.0
 ipython-genutils==0.2.0
 jedi==0.17.2
 jupyter-client==6.1.6
