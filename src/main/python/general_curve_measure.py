@@ -288,9 +288,14 @@ class GeneralCurveMeasure(Measurement):
         self.voltages = np.arange(start = self.v_sweep_start, 
                                   stop = self.v_sweep_finish + self.v_sweep_step_size, 
                                   step = self.v_sweep_step_size) #add an extra step to stop since arange is exclusive
+        
+        # For some combinations, somehow adds an extra point
+        if not np.allclose(self.voltages[-1], self.v_sweep_finish):
+            self.voltages = self.voltages[:-1]
+        
         if self.return_sweep:
             
-            self.reverse_voltages = np.arange(start = self.v_sweep_finish - self.v_sweep_step_size, stop = self.v_sweep_start - (self.v_sweep_step_size/2), step = -self.v_sweep_step_size) #step size divided by two then subtracted to ensure correct stop point
+            self.reverse_voltages  = np.flip(self.voltages)
             self.voltages = np.concatenate((self.voltages, self.reverse_voltages))
             self.save_array = np.zeros(shape=(self.voltages.shape[0], 5))
             
