@@ -192,6 +192,7 @@ class TransientStepResponseMeasure(Measurement):
                 
                 ds_reading = self.read_currents()
                 self.save_array[i, 0] = (ds_reading[2] - t0)*1000
+                self.save_array[i, 1] = self.initial_gate_setting
                 self.save_array[i, 2] = ds_reading[0]
                 self.save_array[i, 3] = ds_reading[1]
                 self.save_array[i, 4] = ds_reading[3]
