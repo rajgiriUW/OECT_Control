@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>766</width>
-    <height>813</height>
+    <height>906</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -53,6 +53,36 @@
             <string>Keithley 2400 1 (G)</string>
            </property>
            <layout class="QGridLayout" name="gridLayout_2">
+            <item row="2" column="2">
+             <widget class="QDoubleSpinBox" name="current_compliance_g_doubleSpinBox">
+              <property name="decimals">
+               <number>11</number>
+              </property>
+              <property name="singleStep">
+               <double>0.000010000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0" colspan="2">
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Voltage Compliance Limit (V)</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Source Mode</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
             <item row="0" column="2">
              <widget class="QComboBox" name="source_mode_comboBox">
               <item>
@@ -67,39 +97,6 @@
               </item>
              </widget>
             </item>
-            <item row="3" column="2">
-             <widget class="QDoubleSpinBox" name="voltage_compliance_g_doubleSpinBox"/>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Source Mode</string>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0" colspan="2">
-             <widget class="QLabel" name="label_3">
-              <property name="text">
-               <string>Voltage Compliance Limit (V)</string>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="2">
-             <widget class="QDoubleSpinBox" name="current_compliance_g_doubleSpinBox">
-              <property name="decimals">
-               <number>11</number>
-              </property>
-              <property name="singleStep">
-               <double>0.000010000000000</double>
-              </property>
-             </widget>
-            </item>
             <item row="2" column="0" colspan="2">
              <widget class="QLabel" name="label_2">
               <property name="text">
@@ -110,6 +107,9 @@
               </property>
              </widget>
             </item>
+            <item row="3" column="2">
+             <widget class="QDoubleSpinBox" name="voltage_compliance_g_doubleSpinBox"/>
+            </item>
            </layout>
           </widget>
          </item>
@@ -119,59 +119,6 @@
             <string>Keithley 2400 2 (DS)</string>
            </property>
            <layout class="QGridLayout" name="gridLayout">
-            <item row="1" column="3">
-             <widget class="QLabel" name="label_13">
-              <property name="text">
-               <string>Manual Range</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="5">
-             <widget class="QComboBox" name="manual_range_comboBox"/>
-            </item>
-            <item row="3" column="3" colspan="2">
-             <widget class="QLabel" name="label_7">
-              <property name="text">
-               <string>Measurement Speed (PLC)</string>
-              </property>
-              <property name="scaledContents">
-               <bool>false</bool>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="5">
-             <widget class="QDoubleSpinBox" name="nplc_doubleSpinBox"/>
-            </item>
-            <item row="3" column="0" colspan="2">
-             <widget class="QLabel" name="label_6">
-              <property name="text">
-               <string>Current Compliance Limit (A)</string>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="2">
-             <widget class="QDoubleSpinBox" name="current_compliance_ds_doubleSpinBox"/>
-            </item>
-            <item row="1" column="0" colspan="3">
-             <widget class="QCheckBox" name="autorange_checkBox">
-              <property name="text">
-               <string>Autorange</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_5">
-              <property name="text">
-               <string>Autozero</string>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="2">
              <widget class="QComboBox" name="autozero_comboBox">
               <item>
@@ -191,6 +138,59 @@
               </item>
              </widget>
             </item>
+            <item row="1" column="3">
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string>Manual Range</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>Autozero</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="3" colspan="2">
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>Measurement Speed (PLC)</string>
+              </property>
+              <property name="scaledContents">
+               <bool>false</bool>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0" colspan="2">
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Current Compliance Limit (A)</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="5">
+             <widget class="QComboBox" name="manual_range_comboBox"/>
+            </item>
+            <item row="3" column="2">
+             <widget class="QDoubleSpinBox" name="current_compliance_ds_doubleSpinBox"/>
+            </item>
+            <item row="1" column="0" colspan="3">
+             <widget class="QCheckBox" name="autorange_checkBox">
+              <property name="text">
+               <string>Autorange</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="5">
+             <widget class="QDoubleSpinBox" name="nplc_doubleSpinBox"/>
+            </item>
            </layout>
           </widget>
          </item>
@@ -202,140 +202,303 @@
         <property name="title">
          <string>Measurement Settings</string>
         </property>
-        <layout class="QGridLayout" name="gridLayout_3">
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_14">
-           <property name="text">
-            <string>Delay Gate (s)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2" colspan="2">
-          <widget class="QDoubleSpinBox" name="drain_bias_doubleSpinBox"/>
-         </item>
-         <item row="3" column="2" colspan="2">
-          <widget class="QDoubleSpinBox" name="delay_gate_doubleSpinBox"/>
-         </item>
-         <item row="1" column="2" colspan="2">
-          <widget class="QDoubleSpinBox" name="initial_gate_setting_doubleSpinBox"/>
-         </item>
-         <item row="2" column="2" colspan="2">
-          <widget class="QDoubleSpinBox" name="first_bias_settle_doubleSpinBox"/>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_15">
-           <property name="text">
-            <string>First Bias Settle (ms)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="label_12">
-           <property name="text">
-            <string>Gate (V or I))</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="label_9">
-           <property name="text">
-            <string>Software Avg</string>
-           </property>
-           <property name="wordWrap">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="0" colspan="2">
-          <widget class="QLabel" name="label_10">
-           <property name="text">
-            <string>Delay bw Avg (ms)</string>
-           </property>
-           <property name="wordWrap">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="2" colspan="2">
-          <widget class="QDoubleSpinBox" name="setpoint_doubleSpinBox"/>
-         </item>
-         <item row="9" column="2" colspan="2">
-          <widget class="QDoubleSpinBox" name="total_measurement_time_doubleSpinBox"/>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_16">
-           <property name="text">
-            <string>Gate on (s)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="3">
-          <widget class="QDoubleSpinBox" name="num_cycles_doubleSpinBox">
-           <property name="decimals">
-            <number>0</number>
-           </property>
-           <property name="minimum">
-            <double>1.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="2" colspan="2">
-          <widget class="QDoubleSpinBox" name="software_averages_doubleSpinBox"/>
-         </item>
-         <item row="1" column="0" colspan="2">
-          <widget class="QLabel" name="label_8">
-           <property name="text">
-            <string>Initial Gate Setting (V or I)</string>
-           </property>
-           <property name="wordWrap">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="2" colspan="2">
-          <widget class="QDoubleSpinBox" name="gate_time_doubleSpinBox">
-           <property name="prefix">
-            <string/>
-           </property>
-           <property name="decimals">
-            <number>5</number>
-           </property>
-           <property name="maximum">
-            <double>103.989999999999995</double>
-           </property>
-           <property name="singleStep">
-            <double>0.010000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="2" colspan="2">
-          <widget class="QDoubleSpinBox" name="delay_between_averages_doubleSpinBox"/>
-         </item>
-         <item row="9" column="0" colspan="2">
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string>Measurement Time per Cycle (s)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="0" colspan="2">
-          <widget class="QLabel" name="label_17">
-           <property name="text">
-            <string>Num. of cycles</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>Drain Bias (V)</string>
-           </property>
-           <property name="wordWrap">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QLabel" name="label_14">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>210</y>
+           <width>69</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Delay Gate (s)</string>
+         </property>
+        </widget>
+        <widget class="QDoubleSpinBox" name="drain_bias_doubleSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>200</x>
+           <y>90</y>
+           <width>111</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QDoubleSpinBox" name="delay_gate_doubleSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>200</x>
+           <y>210</y>
+           <width>111</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QDoubleSpinBox" name="initial_gate_setting_doubleSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>200</x>
+           <y>130</y>
+           <width>111</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QDoubleSpinBox" name="first_bias_settle_doubleSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>200</x>
+           <y>170</y>
+           <width>111</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="decimals">
+          <number>0</number>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_15">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>170</y>
+           <width>98</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>First Bias Settle (ms)</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_12">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>290</y>
+           <width>111</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Gate (Volts or Amps)</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_9">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>330</y>
+           <width>66</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Software Avg</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QDoubleSpinBox" name="setpoint_doubleSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>200</x>
+           <y>290</y>
+           <width>111</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QDoubleSpinBox" name="total_measurement_time_doubleSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>228</x>
+           <y>360</y>
+           <width>81</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_16">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>250</y>
+           <width>54</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Gate on (s)</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_8">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>130</y>
+           <width>181</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Initial Gate Setting (V or I)</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QDoubleSpinBox" name="gate_time_doubleSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>200</x>
+           <y>250</y>
+           <width>111</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="prefix">
+          <string/>
+         </property>
+         <property name="decimals">
+          <number>3</number>
+         </property>
+         <property name="maximum">
+          <double>103.989999999999995</double>
+         </property>
+         <property name="singleStep">
+          <double>0.010000000000000</double>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_11">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>360</y>
+           <width>191</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Total measurement Time per Cycle (s)</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_4">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>90</y>
+           <width>64</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Drain Bias (V)</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QDoubleSpinBox" name="software_averages_doubleSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>100</x>
+           <y>330</y>
+           <width>49</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <double>10.000000000000000</double>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_17">
+         <property name="geometry">
+          <rect>
+           <x>180</x>
+           <y>330</y>
+           <width>70</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Num. of cycles</string>
+         </property>
+        </widget>
+        <widget class="QDoubleSpinBox" name="num_cycles_doubleSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>270</x>
+           <y>330</y>
+           <width>39</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="minimum">
+          <double>1.000000000000000</double>
+         </property>
+        </widget>
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>23</y>
+           <width>261</width>
+           <height>51</height>
+          </rect>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>1677721</height>
+          </size>
+         </property>
+         <property name="baseSize">
+          <size>
+           <width>5</width>
+           <height>5</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>GroupBox</string>
+         </property>
+         <widget class="QRadioButton" name="radioButtonStepDrain">
+          <property name="geometry">
+           <rect>
+            <x>160</x>
+            <y>20</y>
+            <width>82</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Step Drain</string>
+          </property>
+         </widget>
+         <widget class="QRadioButton" name="radioButtonStepGate">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>20</y>
+            <width>98</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Step Gate</string>
+          </property>
+         </widget>
+        </widget>
        </widget>
       </item>
       <item>
@@ -369,8 +532,6 @@
   <tabstop>first_bias_settle_doubleSpinBox</tabstop>
   <tabstop>delay_gate_doubleSpinBox</tabstop>
   <tabstop>setpoint_doubleSpinBox</tabstop>
-  <tabstop>software_averages_doubleSpinBox</tabstop>
-  <tabstop>delay_between_averages_doubleSpinBox</tabstop>
   <tabstop>total_measurement_time_doubleSpinBox</tabstop>
   <tabstop>start_pushButton</tabstop>
   <tabstop>interrupt_pushButton</tabstop>
